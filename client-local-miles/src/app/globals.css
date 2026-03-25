@@ -1,0 +1,88 @@
+/* src/styles/globals.css */
+
+:root {
+  /* --- BRAND COLORS --- */
+  --brand-gold: #D4AF37;
+  --brand-gold-light: #F3E5AB;
+  --brand-dark: #2B241D;
+  
+  /* --- LIGHT THEME (Default) --- */
+  --bg-page: #F4F5F7;
+  --bg-card: #FFFFFF;
+  --text-main: #171717;
+  --text-muted: #858585;
+  --border-light: #E5E5E5;
+
+  /* --- SIZES --- */
+  --sidebar-width: 260px;
+  --radius-card: 16px;
+  --anim-speed: 0.2s;
+}
+
+/* --- DARK THEME Support --- */
+/* Combining data-theme and .dark class ensures no race conditions */
+[data-theme='dark'], .dark {
+  --bg-page: #121212;   
+  --bg-card: #1E1E1E;   
+  --text-main: #F5F5F5;
+  --text-muted: #A3A3A3;
+  
+  /* Use RGBA for the border to blend smoothly in dark mode */
+  --border-light: rgba(255, 255, 255, 0.08); 
+}
+
+/* --- UNIVERSAL RESET & BORDER FIX --- */
+* { 
+  box-sizing: border-box; 
+  padding: 0; 
+  margin: 0; 
+}
+
+/* Force ALL elements to inherit the current border variable */
+*, *::before, *::after {
+  border-color: var(--border-light);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  /* Do NOT transition the border-color here globally, it causes lag on load/redirect */
+  transition: background-color var(--anim-speed) ease, color var(--anim-speed) ease;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* --- FORM ELEMENTS FONT FIX --- */
+/* By default, inputs do not inherit body fonts. This forces them to match. */
+input, 
+textarea, 
+select, 
+button { 
+  font-family: inherit; 
+}
+
+/* Ensure placeholders also strictly inherit the font (helps on some older browsers) */
+input::placeholder,
+textarea::placeholder {
+  font-family: inherit;
+  /* Optional: Ensure placeholder color matches your theme */
+  color: var(--text-muted);
+}
+
+button { cursor: pointer; }
+
+/* Scrollbar Theme Support */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

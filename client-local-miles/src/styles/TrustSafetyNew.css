@@ -1,0 +1,272 @@
+/* src/styles/TrustSafetyNew.css */
+
+:root {
+  --ts-teal: #2A8575; /* The primary green/teal color from the image */
+  --ts-teal-light: #E6F2F0;
+  --ts-text-dark: #111827;
+  --ts-text-muted: #6B7280;
+  --ts-bg-light: #F9FAFB;
+  --ts-red-bg: #FFF1F2;
+  --ts-red-btn: #991B1B;
+}
+
+.trust-safety-page {
+  background-color: white;
+  overflow-x: hidden;
+}
+
+/* --- GENERAL BADGES --- */
+.badge-teal {
+  display: inline-block;
+  background-color: var(--ts-teal-light);
+  color: var(--ts-teal);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.badge-floating {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ts-teal);
+  z-index: 2;
+}
+
+/* --- HERO SECTION --- */
+.ts-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+.hero-img-block {
+  flex: 1;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  /* Aspect ratio based on image */
+  aspect-ratio: 4/3; 
+  background: var(--ts-bg-light);
+}
+
+.hero-img {
+  object-fit: cover;
+}
+
+.hero-content-block {
+  flex: 1;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--ts-text-dark);
+  margin-bottom: 24px;
+}
+.title-accent { color: var(--ts-teal); }
+
+.hero-desc {
+  font-size: 1.1rem;
+  color: var(--ts-text-muted);
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 480px;
+}
+
+.btn-teal {
+  background-color: var(--ts-teal);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.btn-teal:hover {
+  background-color: #236C60;
+  transform: translateY(-2px);
+}
+
+/* --- "SAFETY FIRST" GRID SECTION --- */
+.ts-grid-section {
+  background-color: var(--ts-bg-light);
+  padding: 100px 24px;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 64px;
+}
+
+.section-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--ts-text-dark);
+  margin-bottom: 16px;
+}
+
+.section-sub {
+  font-size: 1.05rem;
+  color: var(--ts-text-muted);
+  line-height: 1.5;
+}
+
+.safety-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.safety-card {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.3s ease;
+}
+.safety-card:hover {
+  border-color: var(--ts-teal-light);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.04);
+  transform: translateY(-4px);
+}
+
+.icon-box {
+  width: 48px;
+  height: 48px;
+  background-color: var(--ts-teal-light);
+  color: var(--ts-teal);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ts-text-dark);
+  margin-bottom: 12px;
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: var(--ts-text-muted);
+  line-height: 1.5;
+}
+
+/* --- EMERGENCY BANNER --- */
+.emergency-banner {
+  background-color: var(--ts-red-bg);
+  padding: 40px 24px;
+  border-top: 1px solid #FEE2E2;
+  border-bottom: 1px solid #FEE2E2;
+}
+
+.banner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.asterisk-icon {
+  width: 48px;
+  height: 48px;
+  background: #FEE2E2;
+  color: var(--ts-red-btn);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.banner-text h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ts-red-btn);
+  margin-bottom: 4px;
+}
+.banner-text p {
+  color: var(--ts-text-dark);
+}
+
+.banner-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-red {
+  background: var(--ts-red-btn);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.btn-red:hover { opacity: 0.9; }
+
+.btn-white-outline {
+  background: white;
+  color: var(--ts-text-dark);
+  border: 1px solid #E5E7EB;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-white-outline:hover { border-color: #D1D5DB; background: #F9FAFB; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+  .safety-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .ts-hero { flex-direction: column-reverse; gap: 40px; padding: 60px 24px; }
+  .hero-img-block { width: 100%; aspect-ratio: 16/9; }
+  .hero-title { font-size: 2.5rem; }
+  
+  .banner-inner { flex-direction: column; align-items: flex-start; gap: 32px; }
+  .banner-actions { width: 100%; }
+  .btn-red, .btn-white-outline { flex: 1; text-align: center; }
+}
+
+@media (max-width: 600px) {
+  .safety-grid { grid-template-columns: 1fr; }
+  .banner-left { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .banner-actions { flex-direction: column; }
+}

@@ -1,0 +1,220 @@
+/* src/components/styles/CourierRoutePage.css */
+
+/* --- PAGE LAYOUT --- */
+.page-container.courier-route-page {
+  padding: 0; 
+  height: 100vh;
+  display: flex;
+  overflow: hidden; 
+  background-color: var(--bg-page);
+  position: relative;
+}
+
+/* --- LEFT PANEL: FORM --- */
+.route-form-panel {
+  width: 480px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  z-index: 10;
+  padding: 32px;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+}
+
+/* Theme-aware Scrollbar */
+.route-form-panel::-webkit-scrollbar { width: 6px; }
+.route-form-panel::-webkit-scrollbar-thumb { 
+  background-color: var(--border-light); 
+  border-radius: 3px; 
+}
+
+.panel-header { margin-bottom: 24px; }
+.panel-title { font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0; }
+
+.form-section-title {
+  font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 24px 0 16px 0;
+}
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+
+/* --- INPUTS (THEME FIXED) --- */
+.input-field {
+  width: 100%; 
+  padding: 14px 16px;
+  border: 1.5px solid var(--border-light) !important; 
+  background-color: var(--bg-page) !important; 
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 10px;
+  font-size: 0.95rem; 
+  color: var(--text-main); 
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-field:hover {
+  border-color: var(--text-muted) !important;
+}
+
+.input-field:focus {
+  outline: none; 
+  border-color: var(--brand-gold) !important; 
+  background-color: var(--bg-card) !important;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+  transform: translateY(-1px);
+}
+
+.input-field::placeholder { 
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* --- TIME & CHECKBOX GROUP --- */
+.time-group { display: flex; gap: 16px; align-items: center; }
+.time-input-wrapper { flex: 1; }
+
+.checkbox-wrapper {
+  display: flex; align-items: center; cursor: pointer; gap: 10px;
+  user-select: none;
+}
+
+.custom-checkbox-input { display: none; }
+.custom-checkbox-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border-light); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; background: var(--bg-card);
+}
+.custom-checkbox-input:checked + .custom-checkbox-box {
+  background-color: var(--brand-gold); border-color: var(--brand-gold);
+}
+.checkmark-icon { color: var(--brand-dark); width: 14px; height: 14px; opacity: 0; transform: scale(0.5); transition: all 0.2s; }
+.custom-checkbox-input:checked + .custom-checkbox-box .checkmark-icon { opacity: 1; transform: scale(1); }
+
+.checkbox-text { font-size: 0.9rem; font-weight: 500; color: var(--text-main); }
+
+/* --- SLIDER --- */
+.slider-container { margin: 10px 0 20px 0; }
+.slider-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); }
+.highlight-val { color: var(--brand-gold); font-weight: 800; font-size: 1rem; }
+
+.range-slider {
+  width: 100%; -webkit-appearance: none; height: 6px; background: var(--border-light); border-radius: 3px; outline: none; margin: 0;
+}
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+  background: var(--brand-gold); border-radius: 50%; cursor: pointer; 
+  border: 3px solid var(--bg-card); box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
+}
+
+.slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+
+/* --- VEHICLE TOGGLES --- */
+.vehicle-options { display: flex; gap: 12px; }
+.vehicle-btn {
+  flex: 1; padding: 14px;
+  border: 1px solid var(--border-light); border-radius: 10px;
+  background: var(--bg-page); color: var(--text-muted);
+  font-size: 0.9rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.vehicle-btn:hover:not(.active) { border-color: var(--text-muted); background: var(--bg-card); }
+.vehicle-btn.active {
+  background: rgba(212, 175, 55, 0.1); border-color: var(--brand-gold); color: var(--brand-gold);
+}
+
+/* --- SAVE BUTTON --- */
+.btn-save-route {
+  width: 100%; padding: 16px;
+  background: var(--brand-gold); color: var(--brand-dark);
+  border: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 800; cursor: pointer;
+  transition: all 0.2s; margin-top: 16px;
+}
+.btn-save-route:hover {
+  opacity: 0.9; transform: translateY(-2px);
+}
+
+/* --- COMMUTES LIST --- */
+.commute-list { display: flex; flex-direction: column; gap: 12px; }
+.commute-card {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px; border: 1px solid var(--border-light); border-radius: 12px;
+  background: var(--bg-card); transition: 0.2s;
+}
+.commute-card.active { border-color: var(--brand-gold); background: rgba(212, 175, 55, 0.05); }
+
+.commute-info { display: flex; align-items: center; gap: 16px; }
+.commute-icon-box {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--bg-page); border: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+}
+.commute-card.active .commute-icon-box { 
+  border-color: var(--brand-gold); color: var(--brand-gold); background: var(--bg-card); 
+}
+
+.commute-text h4 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
+.commute-text p { margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-muted); }
+
+/* iOS Style Switch */
+.switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--border-light); transition: .3s; border-radius: 34px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+  background-color: #fff; transition: .3s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #10B981; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* --- RIGHT PANEL: MAP --- */
+.map-panel {
+  flex: 1;
+  background: var(--border-light);
+  position: relative;
+  height: 100%;
+}
+
+.map-btn {
+  width: 44px; height: 44px; background: var(--bg-card); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid var(--border-light); 
+  cursor: pointer; color: var(--text-main); transition: 0.2s;
+}
+
+.route-info-card {
+  position: absolute; bottom: 32px; left: 32px; z-index: 5;
+  background: var(--bg-card);
+  padding: 16px 20px; border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column; gap: 6px; min-width: 220px;
+  border: 1px solid var(--border-light);
+}
+
+/* --- DARK THEME SPECIFIC FIXES --- */
+.dark .route-info-card {
+  background: rgba(30, 30, 30, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+.dark .input-field {
+  color-scheme: dark; /* Fixes browser-level time/date picker themes */
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1100px) {
+  .page-container.courier-route-page { flex-direction: column; height: auto; min-height: 100vh; overflow-y: auto; }
+  .route-form-panel { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-light); }
+  .map-panel { width: 100%; height: 500px; flex: none; }
+}

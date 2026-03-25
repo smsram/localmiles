@@ -1,0 +1,255 @@
+/* src/styles/PackageDetails.css */
+
+.pd-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--text-main);
+}
+
+.fade-in {
+  animation: pdFadeIn 0.4s ease-out forwards;
+}
+@keyframes pdFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- HEADER --- */
+.pd-header { margin-bottom: 24px; }
+.pd-back-btn {
+  background: transparent; border: none;
+  color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; transition: color 0.2s;
+}
+.pd-back-btn:hover { color: var(--text-main); }
+
+.pd-title-row {
+  display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;
+}
+.pd-title { font-size: 1.8rem; font-weight: 800; margin: 0 0 4px 0; }
+.pd-id { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+.pd-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.pd-badge {
+  padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
+}
+
+/* --- BUTTONS --- */
+.pd-button-group {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.pd-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.2s; border: none; white-space: nowrap;
+}
+
+.pd-btn-primary { 
+  background: var(--brand-gold); 
+  color: #171717; 
+}
+.pd-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.pd-btn-outline {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+}
+.pd-btn-outline:hover {
+  background: var(--bg-page);
+}
+
+.pd-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1px solid transparent;
+}
+.pd-btn-danger:hover {
+  background: #EF4444;
+  color: white;
+}
+
+/* --- CARDS & GRID --- */
+.pd-main-grid {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 24px;
+}
+@media (max-width: 900px) {
+  .pd-main-grid { grid-template-columns: 1fr; }
+}
+
+.pd-card {
+  background-color: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-card, 16px); padding: 24px; margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+.pd-card-title {
+  font-size: 1.1rem; font-weight: 700; margin: 0 0 20px 0;
+  display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 12px;
+}
+.pd-card-subtitle { font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;}
+
+/* --- STEPPER --- */
+.pd-stepper-card { padding: 32px 24px; overflow-x: auto; }
+.pd-stepper-container {
+  display: flex; justify-content: space-between; align-items: center; min-width: 600px; position: relative;
+}
+.pd-step {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; flex: 1; z-index: 2;
+}
+.pd-step-circle {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--bg-page);
+  border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center;
+  color: white; transition: all 0.3s ease;
+}
+.pd-step-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-align: center; }
+
+.pd-step-line {
+  position: absolute; top: 14px; left: 50%; width: 100%; height: 3px;
+  background: var(--border-light); z-index: -1;
+}
+.pd-step.active .pd-step-circle { background: var(--brand-gold); border-color: var(--brand-gold); }
+.pd-step.active .pd-step-label { color: var(--text-main); }
+.pd-step-line.active-line { background: var(--brand-gold); }
+
+/* --- LEFT COLUMN: PACKAGE INFO --- */
+.pd-info-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px;
+}
+.pd-info-item label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+.pd-info-item p { font-size: 0.95rem; font-weight: 600; margin: 0; }
+
+.pd-tags { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.pd-tag { padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border-light); }
+.pd-tag.fragile { background: rgba(239, 68, 68, 0.1); color: #EF4444; border-color: rgba(239, 68, 68, 0.2); }
+.pd-tag.liquid { background: rgba(59, 130, 246, 0.1); color: #3B82F6; border-color: rgba(59, 130, 246, 0.2); }
+.pd-tag.gift { background: rgba(168, 85, 247, 0.1); color: #A855F7; border-color: rgba(168, 85, 247, 0.2); }
+
+.pd-description { background: var(--bg-page); padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--border-light); }
+.pd-description label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+.pd-description p { margin: 4px 0 0 0; font-size: 0.9rem; line-height: 1.4; }
+
+.pd-no-images { background: var(--bg-page); padding: 20px; text-align: center; border-radius: 12px; font-size: 0.85rem; color: var(--text-muted); border: 1px dashed var(--border-light); }
+
+/* PEOPLE CARD */
+.pd-people-card { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; }
+@media (max-width: 600px) { .pd-people-card { grid-template-columns: 1fr; gap: 16px; } }
+.pd-person-divider { width: 1px; background: var(--border-light); }
+@media (max-width: 600px) { .pd-person-divider { width: 100%; height: 1px; } }
+.pd-person-name { font-size: 1.1rem; font-weight: 700; margin: 0 0 4px 0; }
+.pd-person-contact { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin: 0 0 4px 0; }
+.pd-person-vehicle { display: inline-block; margin-top: 8px; padding: 4px 10px; background: var(--bg-page); border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border-light); }
+
+/* --- RIGHT COLUMN: ROUTE & RECEIPT --- */
+.pd-map-placeholder {
+  width: 100%; height: 120px; background: var(--bg-page); border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px dashed var(--border-light); margin-bottom: 24px;
+}
+
+.pd-route-timeline { display: flex; flex-direction: column; }
+.pd-route-node { display: flex; gap: 16px; }
+.pd-node-dot { width: 12px; height: 12px; border-radius: 50%; border: 3px solid var(--brand-gold); background: var(--bg-card); margin-top: 4px; z-index: 2; }
+.pd-route-node.drop .pd-node-dot { border-color: var(--text-main); background: var(--text-main); }
+.pd-node-content label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 2px; }
+.pd-node-content p { font-size: 0.9rem; margin: 0; font-weight: 500; line-height: 1.4; }
+
+.pd-route-line {
+  margin-left: 5px; border-left: 2px dashed var(--border-light); padding: 16px 0 16px 24px;
+  min-height: 40px; position: relative;
+}
+.pd-route-line span {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: var(--bg-page); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border-light);
+}
+
+/* RECEIPT */
+.pd-receipt-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted); }
+.pd-receipt-divider { border-top: 1px dashed var(--border-light); margin: 16px 0; }
+.pd-receipt-row.pd-total { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 0; }
+.pd-payment-mode { margin-top: 24px; font-size: 0.8rem; color: var(--text-muted); text-align: center; background: var(--bg-page); padding: 8px; border-radius: 8px; }
+
+/* LOADING SCREEN */
+.pd-loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; color: var(--text-muted); }
+.pd-spinner { width: 40px; height: 40px; border: 3px solid var(--border-light); border-top: 3px solid var(--brand-gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+
+/* --- PROGRESS STEPPER (ANIMATED) --- */
+.pd-stepper-card { padding: 32px 24px; overflow-x: auto; }
+.pd-stepper-container {
+  display: flex; justify-content: space-between; align-items: center; min-width: 600px; position: relative;
+}
+.pd-step {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; flex: 1; z-index: 2;
+}
+.pd-step-circle {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--bg-page);
+  border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center;
+  color: white; transition: all 0.4s ease-in-out;
+}
+.pd-step-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-align: center; transition: color 0.4s; }
+
+.pd-step-line {
+  position: absolute; top: 14px; left: 50%; width: 100%; height: 3px;
+  background: var(--border-light); z-index: -1; border-radius: 4px; overflow: hidden;
+}
+/* The animated fill element inside the line */
+.pd-step-line-progress {
+  position: absolute; top: 0; left: 0; height: 100%; width: 0;
+  background: var(--brand-gold); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pd-step.active .pd-step-circle { background: var(--brand-gold); border-color: var(--brand-gold); }
+.pd-step.active .pd-step-label { color: var(--text-main); }
+
+
+/* --- ROUTE INFO TIMELINE (FIXED STRUCTURE) --- */
+.pd-map-placeholder {
+  width: 100%; height: 120px; background: var(--bg-page); border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px dashed var(--border-light); margin-bottom: 24px;
+}
+
+.pd-route-timeline { display: flex; flex-direction: column; }
+
+.pd-route-node { display: flex; align-items: flex-start; gap: 16px; }
+
+/* The Dot */
+.pd-node-dot { 
+  width: 14px; height: 14px; border-radius: 50%; 
+  border: 3px solid var(--brand-gold); background: var(--bg-card); 
+  flex-shrink: 0; margin-top: 4px; z-index: 2; position: relative; 
+}
+.pd-node-dot.drop-dot { border-color: var(--text-main); background: var(--text-main); }
+
+/* The Text Content */
+.pd-node-content { position: relative; top: -2px; }
+.pd-node-content label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 2px; }
+.pd-node-content p { font-size: 0.9rem; margin: 0; font-weight: 500; line-height: 1.4; color: var(--text-main); }
+
+/* The Dashed Line perfectly connecting the dots */
+.pd-route-line-container {
+  display: flex; align-items: center; 
+  margin-left: 6px; /* Dot is 14px. Line is 2px. (14/2) - (2/2) = 6px */
+  padding: 8px 0;
+  min-height: 48px;
+}
+.pd-route-dashed-line {
+  width: 2px;
+  height: 100%;
+  min-height: 48px;
+  background: repeating-linear-gradient(to bottom, var(--border-light) 0, var(--border-light) 6px, transparent 6px, transparent 12px);
+}
+.pd-route-distance {
+  margin-left: 20px;
+  background: var(--bg-page);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}

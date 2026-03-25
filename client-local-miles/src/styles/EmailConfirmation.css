@@ -1,0 +1,126 @@
+/* src/styles/EmailConfirmation.css */
+
+:root {
+  --brand-gold: #D4AF37;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+  --bg-page: #F9FAFB;
+}
+
+.email-confirm-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-page);
+  padding: 20px;
+}
+
+/* The centered card */
+.confirm-card {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  padding: 48px;
+  border-radius: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+/* Back link inside the card */
+.card-back-header {
+  text-align: left;
+  margin-bottom: 32px;
+}
+.back-link-simple {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+.back-link-simple:hover { color: var(--text-main); }
+
+/* Icon Wrapper */
+.icon-wrapper-lg {
+  width: 80px;
+  height: 80px;
+  background: rgba(212, 175, 55, 0.15); /* Gold tint */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+  color: var(--brand-gold);
+}
+
+/* Typography */
+.confirm-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.confirm-text {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+.email-highlight {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* Secondary Outline Button */
+.btn-secondary-outline {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border: 2px solid var(--border-light);
+  background: white;
+  color: var(--text-main);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary-outline:hover {
+  border-color: var(--brand-gold);
+  background: #FFFBEB; /* Subtle gold tint bg */
+}
+
+/* Reuse Resend styles */
+.resend-wrapper-center {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.resend-link-bold {
+  color: var(--brand-gold);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+}
+.resend-link-bold:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .confirm-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  .confirm-title { font-size: 1.5rem; }
+}

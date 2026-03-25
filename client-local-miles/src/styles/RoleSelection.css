@@ -1,0 +1,191 @@
+/* src/styles/RoleSelection.css */
+
+:root {
+  --brand-gold: #D4AF37;
+  --brand-dark: #2B241D;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+  --bg-dots: #808080; /* Color for the background dots */
+}
+
+.onboarding-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: white;
+  /* Dotted Background Pattern */
+  background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
+  background-size: 32px 32px;
+  text-align: center;
+}
+
+/* Header Section */
+.logo-header {
+  margin-bottom: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-header img {
+  border-radius: 8px;
+}
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.main-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.sub-title {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 48px;
+}
+
+/* --- SELECTION GRID --- */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 48px;
+}
+
+/* Card Styles */
+.role-card {
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 40px 24px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+  border-color: #D1D5DB;
+}
+
+/* Active State */
+.role-card.active {
+  border: 2px solid var(--brand-gold);
+  background: #FFFBEB; /* Very light gold tint */
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  transform: translateY(-4px);
+}
+
+/* Icons */
+.icon-box {
+  width: 64px;
+  height: 64px;
+  background: #F3F4F6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: #9CA3AF;
+  transition: all 0.2s;
+}
+.role-card.active .icon-box {
+  background: var(--brand-gold);
+  color: #1F2937; /* Dark icon on gold */
+}
+/* Specifically for "Both" card which uses gold by default in design */
+.role-card.recommended .icon-box {
+  background: var(--brand-gold);
+  color: #1F2937;
+}
+
+/* Text */
+.role-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+.role-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Badge for Recommended */
+.badge-recommended {
+  position: absolute;
+  top: -12px;
+  background: var(--brand-gold);
+  color: #1F2937;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Continue Button */
+.btn-continue {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #F3F4F6;
+  color: #9CA3AF;
+}
+.btn-continue.enabled {
+  background: var(--brand-gold); /* Gold when active */
+  color: #1F2937; /* Dark Text */
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+.btn-continue.enabled:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.skip-link {
+  margin-top: 24px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.skip-link:hover { color: var(--text-main); }
+
+.footer-copy {
+  margin-top: auto;
+  padding-top: 60px;
+  font-size: 0.8rem;
+  color: #9CA3AF;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .role-grid {
+    grid-template-columns: 1fr; /* Stack vertically */
+    max-width: 400px;
+  }
+  .main-title { font-size: 2rem; }
+}

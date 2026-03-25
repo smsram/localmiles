@@ -1,0 +1,620 @@
+/* src/styles/AuthLayout.css */
+
+:root {
+  --brand-dark: #2B241D;
+  --brand-gold: #D4AF37;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+}
+
+/* --- MAIN LAYOUT --- */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: white;
+  overflow: hidden; /* Prevents scrollbars from animations */
+}
+
+/* --- LEFT PANEL (Branding) --- */
+.auth-left {
+  flex: 1;
+  background-color: var(--brand-dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  /* Subtle Dot Pattern Texture */
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-box-sm {
+  width: 32px;
+  height: 32px;
+  background: var(--brand-gold);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-dark);
+}
+
+.icon-sm { width: 20px; }
+
+.brand-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.5px;
+}
+
+.hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: -60px; /* Visual balance */
+}
+
+/* --- HERO GRAPHIC ANIMATION --- */
+.hero-graphic {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.graphic-icon {
+  width: 100px;
+  height: 100px;
+  color: var(--brand-gold);
+  z-index: 2;
+}
+
+/* Floating Elements */
+.graphic-float {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: float 6s ease-in-out infinite;
+}
+
+.float-1 { top: 20px; right: 20px; animation-delay: 0s; }
+.float-2 { bottom: 20px; left: 20px; animation-delay: 2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.hero-text h2 {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.hero-text p {
+  font-size: 1rem;
+  color: #9CA3AF;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.quote-footer {
+  font-family: serif;
+  font-style: italic;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+
+/* Update these specific sections in your AuthLayout.css */
+
+.logo-img-sm {
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.main-logo-wrapper {
+  z-index: 2;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 4px solid rgba(212, 175, 55, 0.3);
+}
+
+.graphic-logo {
+  display: block;
+  object-fit: cover;
+}
+
+.graphic-circle {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Floating Elements with Icons */
+.graphic-float {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: float 6s ease-in-out infinite;
+  z-index: 3;
+}
+
+.float-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--brand-gold);
+}
+
+.float-1 { 
+  top: -10px; 
+  right: -20px; 
+  animation-delay: 0s; 
+}
+
+.float-2 { 
+  bottom: -10px; 
+  left: -20px; 
+  animation-delay: 2s; 
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Ensure the hero-graphic container is large enough for the logo */
+.hero-graphic {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+
+/* --- RIGHT PANEL (Form Area) --- */
+.auth-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: white;
+  min-height: 100vh; /* Ensures vertical centering */
+}
+
+.auth-content-box {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* --- FORM STYLES --- */
+.auth-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  font-size: 0.95rem;
+}
+
+/* Google Button */
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid var(--border-light);
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-google:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Primary Button */
+.btn-primary {
+  width: 100%;
+  background: var(--brand-gold);
+  color: #1F2937; /* Dark text for contrast */
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: #9CA3AF;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+/* Form Fields */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  color: var(--text-main);
+}
+
+.form-group input:focus {
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* Password Field Wrapper */
+.input-wrapper {
+  position: relative;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  color: var(--brand-gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.checkbox-group input {
+  margin-top: 3px;
+  accent-color: var(--brand-gold);
+}
+
+.checkbox-group a {
+  color: var(--text-main);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Footer Links */
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+/* --- RESPONSIVE ADJUSTMENTS --- */
+@media (max-width: 900px) {
+  /* Hide the branding panel on small screens for a cleaner look */
+  .auth-left {
+    display: none;
+  }
+
+  /* Center the form on the page */
+  .auth-right {
+    padding: 20px;
+    background-color: white;
+  }
+}
+
+
+/* src/styles/AuthLayout.css */
+
+/* ... (keep all previous styles for auth-container, auth-left, auth-right, etc.) ... */
+
+/* --- NEW STYLES FOR VERIFICATION PAGES --- */
+
+/* Back Button Header */
+.auth-back-header {
+  margin-bottom: 24px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+.back-link:hover {
+  color: var(--text-main);
+}
+
+/* Emphasis text (e.g., phone number) */
+.text-emphasis {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* OTP Input Grid */
+.otp-grid {
+  display: flex;
+  gap: 16px;
+  margin: 32px 0;
+  justify-content: flex-start;
+}
+
+.otp-input {
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s;
+  background: #F9FAFB;
+}
+
+.otp-input:focus {
+  border-color: var(--brand-gold);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+
+/* Resend Link Style */
+.resend-text {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.resend-link {
+  color: var(--brand-gold);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+}
+.resend-link:hover {
+  text-decoration: underline;
+}
+
+/* --- RESPONSIVE TWEAKS FOR OTP --- */
+@media (max-width: 480px) {
+  .otp-grid {
+    gap: 12px;
+    justify-content: space-between;
+  }
+  .otp-input {
+    width: 100%; /* Allow them to shrink equally */
+    height: 56px;
+    font-size: 1.25rem;
+    flex: 1;
+  }
+}
+
+
+/* --- FORGOT PASSWORD / SUCCESS STATES --- */
+
+/* Back Link (Arrow) */
+.back-link-wrapper {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.link-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.2s;
+}
+.link-back:hover {
+  opacity: 0.7;
+}
+
+/* Success View Container */
+.success-view {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gold Icon Wrapper (Envelope) */
+.icon-success-wrapper {
+  width: 80px;
+  height: 80px;
+  background: #FFFBEB; /* Very light gold/cream */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+/* The small checkmark badge on the icon */
+.icon-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--brand-gold);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Open Email App Button (External Link style) */
+.btn-gold-outline {
+  width: 100%;
+  background: var(--brand-gold);
+  color: #1F2937;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  transition: opacity 0.2s;
+  text-decoration: none;
+}
+.btn-gold-outline:hover {
+  opacity: 0.9;
+}
+
+/* Resend Text */
+.resend-row {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.btn-resend {
+  background: none;
+  border: none;
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 4px;
+}

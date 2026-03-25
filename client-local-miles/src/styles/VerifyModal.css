@@ -1,0 +1,758 @@
+/* src/styles/VerifyModal.css */
+
+:root {
+  --brand-blue: #0087FF; /* Truecaller Blue */
+  --brand-whatsapp: #25D366; /* WhatsApp Green */
+  --brand-dark: #2B241D;   /* Match your Auth Layout */
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+}
+
+/* 1. Full Screen Overlay Container */
+.modal-page-container {
+  position: fixed; /* Break out of any parent layout constraints */
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  z-index: 9999; /* Ensure it sits on top of everything */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 2. CSS-Generated "Fake" Login Background (Split Screen) */
+  /* Left 50% Dark, Right 50% White - Mimics your AuthLayout */
+  background: linear-gradient(
+    90deg, 
+    var(--brand-dark) 0%, 
+    var(--brand-dark) 50%, 
+    #ffffff 50%, 
+    #ffffff 100%
+  );
+}
+
+/* 3. The Blur/Darken Backdrop */
+.modal-page-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4); /* Dark overlay */
+  backdrop-filter: blur(8px);      /* The blur effect */
+  z-index: 0;
+}
+
+/* Mobile Background Adjustment */
+@media (max-width: 900px) {
+  .modal-page-container {
+    /* On mobile, usually the dark panel is hidden or full screen. 
+       Let's just make it dark to look consistent/premium */
+    background: var(--brand-dark); 
+  }
+}
+
+/* --- THE MODAL CARD --- */
+.verification-card {
+  position: relative;
+  z-index: 10;
+  background: white;
+  width: 90%;
+  max-width: 400px; /* Aligned with design */
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Icon Header */
+.shield-icon-wrapper {
+  position: relative;
+  width: 60px;
+  height: 80px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-outline {
+  width: 48px;
+  height: 72px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+.phone-notch {
+  width: 16px; height: 2px;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+.secure-badge {
+  position: absolute;
+  bottom: 4px;
+  right: -8px;
+  background: white;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Text */
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+.modal-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+  padding: 0 10px;
+}
+
+/* Phone Input */
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  background: white;
+  transition: border-color 0.2s;
+}
+.phone-input-group:focus-within {
+  border-color: var(--text-main);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+.country-code {
+  font-weight: 700;
+  color: var(--text-main);
+  padding-right: 12px;
+  border-right: 1px solid var(--border-light);
+  margin-right: 12px;
+  font-size: 0.95rem;
+}
+.phone-field {
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  width: 100%;
+  color: var(--text-main);
+  font-weight: 500;
+}
+.phone-field::placeholder { color: #9CA3AF; font-weight: 400; }
+
+/* Action Buttons */
+.btn-verify {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.btn-verify:active { transform: scale(0.98); }
+.btn-verify:hover { opacity: 0.9; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+.btn-truecaller { background: var(--brand-blue); }
+.btn-whatsapp { background: var(--brand-whatsapp); }
+
+/* Disclaimer */
+.disclaimer {
+  font-size: 0.7rem;
+  color: #9CA3AF;
+  margin-top: 20px;
+  line-height: 1.4;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.96);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #E5E7EB;
+  border-top: 3px solid var(--brand-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.loading-text { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+.re-enter-btn {
+  margin-top: 16px;
+  background: none; border: none;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+
+.otp-step-container {
+  animation: fadeIn 0.4s ease;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Back Button (Top Left of card) */
+.btn-back-icon {
+  position: absolute;
+  top: -20px;
+  left: -10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.btn-back-icon:hover {
+  background: #F3F4F6;
+  color: var(--text-main);
+}
+
+/* OTP Inputs Row */
+.otp-input-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 32px 0;
+}
+
+.otp-digit {
+  width: 45px;
+  height: 50px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-main);
+  outline: none;
+  background: #F9FAFB;
+  transition: all 0.2s;
+}
+
+.otp-digit:focus {
+  border-color: var(--text-main);
+  background: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+
+/* Primary Verify Button */
+.btn-primary-black {
+  width: 100%;
+  background: #111111;
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+.btn-primary-black:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+}
+.btn-primary-black:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Resend Text */
+.resend-timer {
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.btn-resend-text {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Phone Notch Helper (from previous code) */
+.phone-notch {
+  width: 16px; height: 2px;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+
+
+
+/* src/styles/VerifyModal.css */
+
+:root {
+  --brand-blue: #0087FF;
+  --brand-whatsapp: #25D366;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+}
+
+/* 1. Full Screen Overlay (Fixed Position) */
+.modal-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  z-index: 9999; /* Top layer */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Glassmorphism Backdrop */
+  background: rgba(0, 0, 0, 0.4); /* Dark dim */
+  backdrop-filter: blur(8px);      /* Blur effect */
+}
+
+/* 2. The Modal Card */
+.verification-card {
+  position: relative;
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Close Button (Top Right) */
+.btn-close-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.btn-close-modal:hover {
+  background: #F3F4F6;
+  color: var(--text-main);
+}
+
+/* ... (Keep previous styles for inputs, buttons, etc.) ... */
+/* Phone Outline, Shield, Text, Phone Input Group, Action Buttons styles remain exactly the same as previous. */
+
+.shield-icon-wrapper {
+  position: relative;
+  width: 60px;
+  height: 80px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-outline {
+  width: 48px;
+  height: 72px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+.phone-notch {
+  width: 16px; height: 2px;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+.secure-badge {
+  position: absolute;
+  bottom: 4px; right: -8px;
+  background: white; border-radius: 50%; padding: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-title { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 12px; }
+.modal-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+
+.phone-input-group {
+  display: flex; align-items: center;
+  border: 1px solid var(--border-light);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 24px;
+  background: white; transition: border-color 0.2s;
+}
+.phone-input-group:focus-within { border-color: var(--text-main); }
+.country-code { font-weight: 700; color: var(--text-main); margin-right: 12px; padding-right: 12px; border-right: 1px solid var(--border-light); }
+.phone-field { border: none; outline: none; font-size: 1rem; width: 100%; font-weight: 500; }
+
+.btn-verify {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  font-weight: 700; font-size: 0.9rem; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px;
+}
+.btn-whatsapp { background: var(--brand-whatsapp); }
+.btn-truecaller { background: var(--brand-blue); }
+
+.disclaimer { font-size: 0.7rem; color: #9CA3AF; margin-top: 20px; }
+
+/* OTP Specifics */
+.otp-input-group { display: flex; gap: 8px; justify-content: center; margin: 32px 0; }
+.otp-digit {
+  width: 45px; height: 50px; border: 1px solid var(--border-light); border-radius: 8px;
+  font-size: 1.25rem; font-weight: 700; text-align: center; outline: none; background: #F9FAFB;
+}
+.otp-digit:focus { border-color: var(--text-main); background: white; }
+
+.btn-primary-black {
+  width: 100%; background: #111; color: white; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer;
+}
+.btn-back-icon {
+  position: absolute; top: -10px; left: -10px; background: transparent; border: none; cursor: pointer; padding: 8px;
+}
+
+.loading-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.96); border-radius: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20;
+}
+.spinner {
+  width: 40px; height: 40px; border: 3px solid #E5E7EB; border-top: 3px solid var(--brand-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+
+/* Ensure the overlay covers the whole screen and is on top */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+/* Ensure the card is visible white and has a proper size */
+.verification-card {
+  background-color: white;
+  padding: 32px;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 480px;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+
+
+
+/* src/styles/VerifyModal.css */
+
+/* ================= 0. VARIABLES & THEME LOGIC ================= */
+/* Default (Standalone or Light Mode) */
+:root {
+  --vm-brand-blue: #0087FF; 
+  --vm-brand-whatsapp: #25D366; 
+  
+  --vm-bg-card: #FFFFFF;
+  --vm-bg-input: #FFFFFF;
+  --vm-bg-input-idle: #F9FAFB;
+  --vm-bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  --vm-text-main: #1F2937;
+  --vm-text-muted: #6B7280;
+  
+  --vm-border-light: #E5E7EB;
+  --vm-border-focus: #1F2937;
+  
+  --vm-btn-primary: #111111;
+  --vm-btn-primary-text: #FFFFFF;
+  --vm-btn-disabled-bg: #E5E7EB;
+  --vm-btn-disabled-text: #9CA3AF;
+  
+  --vm-error-red: #EF4444;
+  --vm-error-bg: #FEF2F2;
+  --vm-error-border: #FCA5A5;
+
+  --vm-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark Mode Overrides (Only applies when inside Dashboard with theme switch) */
+[data-theme='dark'] {
+  --vm-bg-card: #1E1B16;
+  --vm-bg-input: #15130F;
+  --vm-bg-input-idle: #2B2620;
+  --vm-bg-overlay: rgba(0, 0, 0, 0.7);
+  
+  --vm-text-main: #FDFBF4;
+  --vm-text-muted: #A39D91;
+  
+  --vm-border-light: #3D352B;
+  --vm-border-focus: #D4AF37; /* Brand Gold for dark mode */
+  
+  --vm-btn-primary: #D4AF37;
+  --vm-btn-primary-text: #1E1B16;
+  --vm-btn-disabled-bg: #3D352B;
+  --vm-btn-disabled-text: #6B6358;
+  
+  --vm-error-red: #F87171;
+  --vm-error-bg: rgba(239, 68, 68, 0.1);
+  --vm-error-border: rgba(239, 68, 68, 0.3);
+
+  --vm-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* ================= 1. OVERLAY & CARD ================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background-color: var(--vm-bg-overlay);
+  backdrop-filter: blur(4px);
+  padding: 20px; 
+}
+
+.verification-card {
+  position: relative;
+  background: var(--vm-bg-card);
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: var(--vm-shadow);
+  border: 1px solid var(--vm-border-light);
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden; 
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(20px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.step-fade-in { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ================= 2. ICONS & HEADER ================= */
+.btn-close-modal {
+  position: absolute; top: 16px; right: 16px;
+  background: transparent; border: none;
+  color: var(--vm-text-muted); cursor: pointer;
+  padding: 8px; border-radius: 50%;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+}
+.btn-close-modal:hover { background: var(--vm-bg-input-idle); color: var(--vm-text-main); }
+
+.shield-icon-wrapper {
+  position: relative; width: 60px; height: 80px;
+  margin: 0 auto 24px auto; display: flex; align-items: center; justify-content: center;
+}
+
+.phone-outline {
+  width: 48px; height: 72px;
+  border: 2px solid var(--vm-border-light); border-radius: 10px;
+  background: var(--vm-bg-input-idle);
+  display: flex; flex-direction: column; align-items: center; padding-top: 8px;
+}
+.phone-notch {
+  width: 16px; height: 3px;
+  background: var(--vm-border-light); border-radius: 2px;
+}
+
+.secure-badge {
+  position: absolute; bottom: 4px; right: -8px;
+  background: var(--vm-bg-card); border-radius: 50%; padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ================= 3. TYPOGRAPHY & ERRORS ================= */
+.modal-title {
+  font-size: 1.4rem; font-weight: 800; color: var(--vm-text-main);
+  margin-bottom: 8px; margin-top: 0;
+}
+.modal-desc {
+  font-size: 0.9rem; color: var(--vm-text-muted);
+  line-height: 1.5; margin-bottom: 24px;
+}
+.bold-text { color: var(--vm-text-main); margin-top: 4px; display: block; }
+
+/* Error Box */
+.error-message {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--vm-error-bg); color: var(--vm-error-red); border: 1px solid var(--vm-error-border);
+  padding: 10px 14px; border-radius: 10px; margin-bottom: 20px;
+  font-size: 0.85rem; font-weight: 600; text-align: left;
+  animation: shake 0.4s ease;
+}
+.error-icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ================= 4. INPUTS ================= */
+.phone-input-group {
+  display: flex; align-items: center;
+  border: 2px solid var(--vm-border-light); border-radius: 12px;
+  padding: 12px 16px; margin-bottom: 24px;
+  background: var(--vm-bg-input); transition: all 0.2s;
+}
+.phone-input-group:focus-within { border-color: var(--vm-border-focus); }
+.phone-input-group.has-error { border-color: var(--vm-error-red); background: var(--vm-error-bg); }
+
+.country-code {
+  font-weight: 700; color: var(--vm-text-main);
+  margin-right: 12px; padding-right: 12px; border-right: 2px solid var(--vm-border-light);
+}
+.phone-field {
+  border: none; outline: none; font-size: 1.05rem; width: 100%;
+  font-weight: 600; color: var(--vm-text-main); background: transparent;
+}
+.phone-field::placeholder { color: var(--vm-text-muted); font-weight: 500; opacity: 0.7; }
+
+/* OTP Specifics */
+.otp-input-group { display: flex; gap: 10px; justify-content: center; margin: 24px 0 32px 0; }
+.otp-digit {
+  width: 48px; height: 56px; border: 2px solid var(--vm-border-light); border-radius: 12px;
+  font-size: 1.5rem; font-weight: 700; text-align: center; color: var(--vm-text-main);
+  outline: none; background: var(--vm-bg-input-idle); transition: all 0.2s;
+}
+.otp-digit:focus {
+  border-color: var(--vm-border-focus); background: var(--vm-bg-input);
+  transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.otp-digit.has-error {
+  border-color: var(--vm-error-red); color: var(--vm-error-red); background: var(--vm-error-bg);
+}
+
+/* ================= 5. BUTTONS ================= */
+.btn-verify {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  font-weight: 700; font-size: 0.95rem; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 12px; transition: all 0.2s;
+}
+.btn-verify:active { transform: scale(0.98); }
+.btn-verify:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+.btn-whatsapp { background: var(--vm-brand-whatsapp); }
+.btn-truecaller { background: var(--vm-brand-blue); }
+
+.btn-primary-black {
+  background: var(--vm-btn-primary); color: var(--vm-btn-primary-text); margin-top: 8px;
+}
+.btn-primary-black:disabled {
+  background: var(--vm-btn-disabled-bg); color: var(--vm-btn-disabled-text);
+  cursor: not-allowed; box-shadow: none;
+}
+
+.btn-back-icon {
+  position: absolute; top: 16px; left: 16px;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--vm-text-muted); padding: 8px; border-radius: 50%;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+}
+.btn-back-icon:hover { background: var(--vm-bg-input-idle); color: var(--vm-text-main); }
+
+.resend-timer { margin-top: 24px; font-size: 0.85rem; color: var(--vm-text-muted); }
+.btn-resend-text {
+  background: none; border: none; color: var(--vm-text-main);
+  font-weight: 700; text-decoration: underline; cursor: pointer;
+  padding: 0; margin-left: 4px; transition: color 0.2s;
+}
+.btn-resend-text:hover { color: var(--vm-border-focus); }
+
+.disclaimer { font-size: 0.75rem; color: var(--vm-text-muted); margin-top: 24px; line-height: 1.4; opacity: 0.8;}
+
+/* ================= 6. LOADING OVERLAY ================= */
+.loading-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--vm-bg-card); /* Match card bg */
+  opacity: 0.95;
+  backdrop-filter: blur(2px); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 20;
+}
+
+.spinner {
+  width: 48px; height: 48px;
+  border: 4px solid var(--vm-border-light);
+  border-top: 4px solid var(--vm-brand-whatsapp); /* Keeps brand green in both modes */
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.loading-text { font-weight: 700; color: var(--vm-text-main); font-size: 1rem; }

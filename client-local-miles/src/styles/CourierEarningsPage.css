@@ -1,0 +1,195 @@
+/* src/components/styles/CourierEarningsPage.css */
+
+.page-container.earnings-page {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* --- HEADER --- */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; }
+
+/* --- STATS GRID --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  position: relative;
+  transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: var(--brand-gold); }
+
+.card-label { 
+  font-size: 0.75rem; 
+  font-weight: 700; 
+  color: var(--text-muted); 
+  text-transform: uppercase; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+}
+
+.balance-amount { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin: 12px 0 24px 0; }
+
+.btn-withdraw {
+  width: 100%;
+  background: var(--brand-gold);
+  color: var(--brand-dark);
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: 0.2s;
+}
+.btn-withdraw:hover { opacity: 0.9; }
+
+.perf-row { display: flex; align-items: baseline; gap: 8px; margin-top: 12px; }
+.perf-val { font-size: 2rem; font-weight: 800; color: var(--text-main); }
+.perf-unit { font-size: 1rem; color: var(--text-muted); font-weight: 600; }
+.trips-info { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-main); margin-top: 16px; }
+.badge-green { background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+
+.hours-val { font-size: 3rem; font-weight: 800; color: var(--text-main); line-height: 1; margin: 16px 0 8px 0; }
+.hours-unit { fontSize: 1.5rem; color: var(--text-muted); }
+.shift-start { font-size: 0.85rem; color: var(--text-muted); }
+
+.bg-icon-decor { 
+  position: absolute; 
+  right: 20px; 
+  bottom: 20px; 
+  color: var(--border-light); 
+  width: 60px; 
+  height: 60px; 
+  opacity: 0.5;
+}
+
+/* --- DAILY GOAL CARD --- */
+.goal-card {
+  background: var(--brand-dark);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.goal-title { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; color: #FFFFFF; }
+.goal-sub { color: #9CA3AF; font-size: 0.9rem; }
+.highlight-gold { color: var(--brand-gold); font-weight: 700; }
+
+.progress-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #9CA3AF; margin-bottom: 8px; }
+.progress-track { width: 100%; height: 12px; background: #374151; border-radius: 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand-gold), #FDE047); border-radius: 6px; }
+
+/* --- WEEKLY CHART --- */
+.chart-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.chart-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; }
+.chart-nav { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; }
+
+.bar-chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 200px;
+  padding: 0 10px;
+}
+.chart-column { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; position: relative; }
+
+.bar-bg { width: 12px; background: var(--bg-page); border-radius: 10px; height: 100%; position: relative; display: flex; align-items: flex-end; }
+.bar-fill { width: 100%; background: var(--text-muted); border-radius: 10px; position: relative; transition: height 0.4s ease-out; }
+.bar-fill.active { background: var(--brand-gold); }
+
+.bar-tooltip {
+  position: absolute;
+  top: -35px;
+  background: var(--brand-dark);
+  color: #FFF;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid var(--brand-gold);
+}
+
+.x-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+.x-label.active { color: var(--text-main); font-weight: 800; }
+
+/* --- TRANSACTION HISTORY --- */
+.history-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+}
+.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.view-all-btn { background: none; border: none; font-size: 0.85rem; font-weight: 700; color: var(--brand-gold); cursor: pointer; }
+
+.txn-table { width: 100%; border-collapse: collapse; }
+.txn-table th { text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+.txn-table td { padding: 16px 0; font-size: 0.9rem; color: var(--text-main); border-bottom: 1px solid var(--border-light); }
+
+.txn-id { font-weight: 700; color: var(--text-main); }
+.txn-time { color: var(--text-muted); font-size: 0.85rem; }
+.green-text { color: #10B981; font-weight: 700; }
+
+/* ANIMATION */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .page-container.earnings-page { padding: 20px; padding-bottom: 90px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .col-details { display: none; }
+}

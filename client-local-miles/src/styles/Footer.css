@@ -1,0 +1,185 @@
+/* src/styles/Footer.css */
+
+:root {
+  --footer-bg: #2B241D;
+  --footer-text: #E5E5E5;
+  --footer-muted: #9CA3AF;
+  --brand-gold: #D4AF37;
+  --border-dark: rgba(255, 255, 255, 0.1);
+}
+
+/* --- FOOTER CONTAINER --- */
+.footer-wrapper {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding: 80px 20px 40px;
+  font-family: sans-serif;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- TOP GRID SECTION --- */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.5fr; /* Logo | Company | Legal | App */
+  gap: 40px;
+  margin-bottom: 60px;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 60px;
+}
+
+/* Column 1: Brand */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+}
+.footer-desc {
+  color: var(--footer-muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  max-width: 300px;
+}
+
+/* Social Icons */
+.social-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--footer-muted);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--brand-gold);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Column 2 & 3: Links */
+.footer-col-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6B7280; /* Uppercase muted label */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-link {
+  color: var(--footer-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-link:hover {
+  color: var(--brand-gold);
+}
+
+.hiring-badge {
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--brand-gold);
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Column 4: App Store Buttons */
+.app-store-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.app-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: fit-content;
+  min-width: 180px;
+}
+.app-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-icon { width: 24px; height: 24px; color: white; }
+.btn-text-col { display: flex; flex-direction: column; line-height: 1.2; }
+.btn-label { font-size: 0.65rem; color: #9CA3AF; text-transform: uppercase; font-weight: 700; }
+.btn-store { font-size: 1rem; font-weight: 700; color: white; }
+
+/* --- BOTTOM BAR --- */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--footer-muted);
+}
+.made-with {
+  display: flex; align-items: center; gap: 4px;
+}
+.heart-icon { color: #EF4444; width: 14px; }
+
+/* RESPONSIVE */
+@media (max-width: 1000px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr; /* 2 Columns */
+    gap: 40px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr; /* 1 Column Stack */
+    gap: 40px;
+    text-align: left;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+}

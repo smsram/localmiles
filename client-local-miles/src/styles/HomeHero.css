@@ -1,0 +1,69 @@
+/* src/styles/HomeHero.css */
+.home-cta-section {
+  background-color: #2B241D; /* Matches footer bg for seamless look */
+  padding: 80px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05); /* Slight separator from footer */
+}
+
+.cta-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.highlight-text {
+  color: #D4AF37; /* Brand Gold */
+  font-style: italic;
+  font-family: serif; /* Adds that sophisticated touch */
+}
+
+.cta-desc {
+  color: #9CA3AF;
+  font-size: 1.1rem;
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-primary-gold {
+  background: #D4AF37;
+  color: #1F2937;
+  padding: 14px 32px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.btn-primary-gold:hover { opacity: 0.9; }
+
+.btn-outline-gold {
+  background: transparent;
+  color: #D4AF37;
+  border: 1px solid #D4AF37;
+  padding: 14px 32px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-outline-gold:hover {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+@media (max-width: 768px) {
+  .cta-title { font-size: 2.5rem; }
+  .cta-buttons { flex-direction: column; }
+  .btn-primary-gold, .btn-outline-gold { text-align: center; }
+}

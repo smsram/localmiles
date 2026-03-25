@@ -1,0 +1,262 @@
+/* src/styles/ShipmentCard.css */
+
+/* --- COMPONENT VARIABLES --- */
+:root {
+  --icon-bg-cream: #FDFBF4;
+  --icon-bg-blue: #F0F7FF;
+  --track-bg: #F3F4F6;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --icon-bg-cream: #28251a; 
+  --icon-bg-blue: #151e2e;
+  --track-bg: #374151;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.icon-24 { width: 24px; height: 24px; }
+
+/* --- CARD CONTAINER --- */
+.shipment-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  
+  /* Theme Inheritance */
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  
+  /* Layout & Animation */
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0; 
+  flex-wrap: wrap; /* Safety wrap for mid-resizing */
+}
+
+/* Hover Effect */
+.shipment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--brand-gold);
+}
+
+.shipment-card.z-active {
+  z-index: 50; 
+  border-color: var(--border-light);
+}
+
+/* ================= 1. INFO SECTION ================= */
+.section-info {
+  flex: 0 0 auto; 
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 300px;
+}
+
+.icon-box {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.theme-cream { background: var(--icon-bg-cream); color: var(--brand-gold); }
+.theme-blue { background: var(--icon-bg-blue); color: #3B82F6; }
+
+.text-details { display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
+.id-tag { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+.title-tag { font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.date-tag { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ================= 2. ROUTE SECTION ================= */
+.section-route {
+  flex: 1 1 auto; /* Fill remaining space */
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+  min-width: 0;
+}
+
+.route-inner {
+  width: 100%; 
+  max-width: 100%; 
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.route-header { display: flex; justify-content: space-between; align-items: center; }
+.loc-text { font-size: 0.9rem; font-weight: 600; color: var(--text-main); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.transit-text { font-size: 0.75rem; font-weight: 700; color: var(--brand-gold); text-transform: uppercase; letter-spacing: 0.5px; }
+.align-right { text-align: right; }
+
+.progress-track { width: 100%; height: 6px; background: var(--track-bg); border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--brand-gold); border-radius: 10px; transition: width 0.5s ease; }
+
+.route-footer { display: flex; justify-content: space-between; align-items: center; }
+.indicator-group { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+.align-right.indicator-group { flex-direction: row-reverse; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.filled { background: var(--brand-gold); }
+.dot.hollow { border: 2px solid var(--text-muted); background: transparent; box-sizing: border-box; }
+
+/* ================= 3. ACTIONS & PRICE ================= */
+.section-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: flex-end;
+}
+
+.price-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; 
+  justify-content: center;
+  gap: 4px;
+  min-width: 110px; 
+}
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap;
+}
+.status-draft { background: var(--bg-page); color: var(--text-muted); border: 1px dashed var(--border-light); }
+.status-pending { background: #FEF9E7; color: #B78829; border: 1px solid #F8EFCF; }
+.status-delivered { background: #ECFDF5; color: #047857; border: 1px solid #D1FAE5; }
+
+[data-theme='dark'] .status-pending { background: rgba(183, 136, 41, 0.15); color: #FCD34D; border-color: rgba(183, 136, 41, 0.3); }
+[data-theme='dark'] .status-delivered { background: rgba(16, 185, 129, 0.15); color: #34D399; border-color: rgba(16, 185, 129, 0.3); }
+
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.price-tag { font-size: 1.15rem; font-weight: 800; color: var(--text-main); line-height: 1.2; }
+
+.vertical-divider { width: 1px; height: 48px; background: var(--border-light); flex-shrink: 0; }
+
+.buttons-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.menu-anchor {
+  display: flex;
+  align-items: center;
+}
+
+/* ================= 4. RESPONSIVE BREAKPOINTS ================= */
+
+/* TABLET (Below 1200px) - Break Route to new line */
+@media (max-width: 1200px) {
+  .shipment-card {
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  /* Info stays left */
+  .section-info {
+    flex: 1 1 auto;
+    max-width: 60%;
+  }
+
+  /* Actions stay right */
+  .section-actions {
+    flex: 0 0 auto;
+    order: 2;
+  }
+
+  .vertical-divider { display: none; }
+
+  /* Route moves to bottom full width */
+  .section-route {
+    order: 3; 
+    flex: 1 1 100%;
+    margin-top: 8px; 
+    padding: 20px 0 0 0;
+    border-top: 1px dashed var(--border-light);
+  }
+}
+
+/* MOBILE (Below 640px) - Full Stack */
+@media (max-width: 640px) {
+  .shipment-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  /* 1. Header (Info) */
+  .section-info {
+    max-width: 100%;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 12px;
+  }
+
+  /* 2. Route (Middle) */
+  .section-route {
+    order: 2;
+    border: none;
+    padding: 4px 0;
+    margin: 0;
+    min-width: 0;
+  }
+  .loc-text { font-size: 0.85rem; }
+  .transit-text { display: none; } 
+
+  /* 3. Actions (Bottom) */
+  .section-actions {
+    order: 3;
+    flex-direction: column-reverse; 
+    gap: 16px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Split Price and Status */
+  .price-column {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 0;
+  }
+  .status-badge { order: 1; }
+  .price-tag { order: 2; font-size: 1.1rem; }
+
+  /* --- BUTTONS FULL WIDTH LOGIC --- */
+  .buttons-row {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Primary/Secondary Buttons: Share space equally */
+  .buttons-row > *:not(.menu-anchor) {
+    flex: 1; 
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Ensure inner <button> tag stretches if component structure varies */
+  .buttons-row > *:not(.menu-anchor) button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Also target class names directly just in case */
+  .btn-solid, .btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 3-Dots Menu: Fixed size */
+  .menu-anchor {
+    flex: 0 0 auto;
+  }
+}
