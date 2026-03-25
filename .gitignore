@@ -1,0 +1,8 @@
+# Secrets
+service-account.json
+*.json
+.env
+
+# Embedded git repos
+client-local-miles/
+local-miles-client/

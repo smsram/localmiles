@@ -1,0 +1,270 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  fullName             String
+  email                String         @unique
+  passwordHash         String?
+  phone                String?        @unique
+  isPhoneVerified      Boolean        @default(false)
+  emailVerified        DateTime?
+  avatarUrl            String?
+  role                 UserRole       @default(USER)
+  courierStatus        CourierStatus  @default(NONE)
+  lastActiveMode       AppMode        @default(SENDER)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  primaryGoal          UserIntent?
+  resetPasswordExpires DateTime?
+  resetPasswordToken   String?        @unique
+  publicId             String         @unique
+  walletBalance        Float          @default(0.0)
+  emailAlerts          Boolean        @default(false)
+  language             String         @default("english_in")
+  pushNotifications    Boolean        @default(true)
+  accounts             Account[]
+  otps                 Otp[]
+  courierJobs          Package[]      @relation("CourierJobs")
+  sentPackages         Package[]      @relation("SenderPackages")
+  savedAddresses       SavedAddress[]
+  sessions             Session[]
+  transactions         Transaction[]
+
+  @@map("users")
+}
+
+model SavedAddress {
+  id           String   @id @default(uuid())
+  userId       String
+  title        String
+  type         String
+  isDefault    Boolean  @default(false)
+  address      String
+  line1        String?
+  line2        String?
+  city         String?
+  pincode      String?
+  lat          Float
+  lng          Float
+  contactName  String?
+  contactPhone String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  contactEmail String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_addresses")
+}
+
+model Package {
+  id              String          @id @default(uuid())
+  title           String
+  description     String?
+  weight          Float
+  length          Float?
+  breadth         Float?
+  height          Float?
+  pickupAddress   String
+  pickupLat       Float
+  pickupLng       Float
+  dropAddress     String
+  dropLat         Float
+  dropLng         Float
+  status          PackageStatus   @default(PENDING)
+  price           Float
+  isGift          Boolean         @default(false)
+  senderId        String
+  courierId       String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publicId        String          @unique
+  distanceKm      Float
+  isFragile       Boolean         @default(false)
+  isLiquid        Boolean         @default(false)
+  keepUpright     Boolean         @default(false)
+  paymentMode     PaymentMode     @default(PREPAID)
+  receiverEmail   String?
+  receiverName    String
+  receiverPhone   String
+  safetyConfirmed Boolean         @default(true)
+  urgency         UrgencyLevel    @default(STANDARD)
+  category        PackageCategory @default(DOCUMENTS)
+  scheduledDate   DateTime?
+  size            PackageSize     @default(SMALL_BOX)
+  declaredValue   Float?
+  otherCategory   String?
+  driverFee       Float           @default(0.0)
+  platformFee     Float           @default(0.0)
+  taxAmount       Float           @default(0.0)
+  taxRateApplied  Int             @default(0)
+  images          PackageImage[]
+  courier         User?           @relation("CourierJobs", fields: [courierId], references: [id])
+  sender          User            @relation("SenderPackages", fields: [senderId], references: [id])
+
+  @@map("packages")
+}
+
+model PackageImage {
+  id        String  @id @default(uuid())
+  packageId String
+  url       String
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("package_images")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+  isRevoked    Boolean  @default(false)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  userId    String?
+  phone     String
+  code      String
+  type      String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([phone])
+  @@map("otps")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  userId      String
+  amount      Float
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  method      TransactionMethod
+  description String?
+  referenceId String?
+  createdAt   DateTime          @default(now())
+  user        User              @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CourierStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum AppMode {
+  SENDER
+  COURIER
+}
+
+enum UserIntent {
+  SENDER
+  COURIER
+  BOTH
+}
+
+enum PackageStatus {
+  DRAFT
+  PENDING
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum PackageCategory {
+  DOCUMENTS
+  ELECTRONICS
+  FOOD
+  CLOTHING
+  FURNITURE
+  OTHER
+}
+
+enum PackageSize {
+  ENVELOPE
+  SMALL_BOX
+  MEDIUM_BOX
+  LARGE_BOX
+  OVERSIZED
+}
+
+enum UrgencyLevel {
+  STANDARD
+  URGENT
+  SCHEDULED
+}
+
+enum PaymentMode {
+  PREPAID
+  COD
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionMethod {
+  WALLET
+  ONLINE
+}
