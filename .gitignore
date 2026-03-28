@@ -1,4 +1,3 @@
 # Secrets
 service-account.json
-*.json
 .env

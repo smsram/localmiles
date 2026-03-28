@@ -1,0 +1,28 @@
+{
+  "name": "client-local-miles",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.2.0",
+    "@react-google-maps/api": "^2.20.8",
+    "clsx": "^2.1.1",
+    "firebase": "^12.8.0",
+    "framer-motion": "^12.26.2",
+    "leaflet": "^1.9.4",
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-leaflet": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1"
+  }
+}
