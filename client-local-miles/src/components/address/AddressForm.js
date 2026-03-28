@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import MapPicker from '@/components/ui/MapPicker'; 
 import ToastNotification from '@/components/ui/ToastNotification';
+import Skeleton from '@/components/ui/Skeleton';
 import '@/styles/CreateAddress.css'; 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -28,10 +29,8 @@ export default function AddressForm({ addressId }) {
     isDefault: false, lat: 12.9716, lng: 77.5946, addressText: '' 
   });
 
-  // --- 1. FETCH OR AUTO-DETECT ON LOAD ---
   useEffect(() => {
     if (isEditMode) {
-      // Edit Mode: Fetch Existing
       const fetchAddress = async () => {
         try {
           const token = localStorage.getItem('token');
@@ -57,18 +56,15 @@ export default function AddressForm({ addressId }) {
       };
       fetchAddress();
     } else {
-      // Create Mode: Auto-Detect Location
       handleCurrentLocation(true);
     }
   }, [addressId, isEditMode, router]);
 
-  // --- HANDLERS ---
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  // --- INTELLIGENT REVERSE GEOCODING ---
   const handleLocationSelect = async (loc) => {
     setFormData(prev => ({ ...prev, lat: loc.lat, lng: loc.lng }));
     try {
@@ -77,24 +73,19 @@ export default function AddressForm({ addressId }) {
       
       if (data && data.address) {
         const addr = data.address;
-        
-        // 1. Precisely target the City
         const city = addr.city || addr.town || addr.municipality || addr.county || addr.state_district || '';
-        
-        // 2. Build the Street/Area by combining local identifiers (ignoring duplicates)
         const areaParts = [];
         if (addr.road) areaParts.push(addr.road);
         if (addr.neighbourhood) areaParts.push(addr.neighbourhood);
         if (addr.suburb) areaParts.push(addr.suburb);
         if (addr.village || addr.hamlet) areaParts.push(addr.village || addr.hamlet);
         
-        // Clean up area string (e.g., "MDR0111, గొల్లల మామిడాడ")
         const uniqueAreaParts = [...new Set(areaParts)].filter(part => part !== city);
 
         setFormData(prev => ({
           ...prev,
-          line2: uniqueAreaParts.join(', '), // Extracted Street/Area/Village
-          city: city, // Extracted City
+          line2: uniqueAreaParts.join(', '), 
+          city: city, 
           pincode: addr.postcode || '',
           addressText: data.display_name
         }));
@@ -123,7 +114,6 @@ export default function AddressForm({ addressId }) {
     );
   };
 
-  // --- SUBMIT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -158,9 +148,30 @@ export default function AddressForm({ addressId }) {
 
   if (loading) {
     return (
-      <div className="create-address-container" style={{display:'flex', justifyContent:'center', paddingTop:'100px', flexDirection: 'column', alignItems: 'center'}}>
-        <div className="spinner" style={{width: 40, height: 40, border: '3px solid var(--border-light)', borderTopColor: 'var(--brand-gold)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px'}}></div>
-        <p style={{color: 'var(--text-muted)'}}>Loading address details...</p>
+      <div className="create-address-container" style={{ paddingTop: '40px' }}>
+        <div className="header-row" style={{ marginBottom: '32px' }}>
+            <Skeleton width="40px" height="40px" circle={true} />
+            <Skeleton width="200px" height="32px" style={{ marginLeft: '12px' }} />
+        </div>
+        <div className="layout-grid">
+           <div className="map-section">
+              <Skeleton width="100%" height="300px" borderRadius="12px" />
+              <Skeleton width="100%" height="40px" style={{ marginTop: '16px' }} />
+           </div>
+           <div className="form-section">
+              <div className="skeleton-row" style={{ marginBottom: '24px' }}>
+                 <Skeleton width="30%" height="45px" borderRadius="8px" />
+                 <Skeleton width="30%" height="45px" borderRadius="8px" />
+                 <Skeleton width="30%" height="45px" borderRadius="8px" />
+              </div>
+              {[1, 2, 3, 4].map(n => (
+                 <div key={n} style={{ marginBottom: '20px' }}>
+                    <Skeleton width="120px" height="14px" style={{ marginBottom: '8px' }} />
+                    <Skeleton width="100%" height="48px" borderRadius="8px" />
+                 </div>
+              ))}
+           </div>
+        </div>
       </div>
     );
   }
@@ -173,7 +184,6 @@ export default function AddressForm({ addressId }) {
       </div>
 
       <div className="layout-grid">
-        {/* MAP SECTION */}
         <div className="map-section">
           <div className="map-wrapper">
             <MapPicker lat={formData.lat} lng={formData.lng} onLocationSelect={handleLocationSelect} />
@@ -187,7 +197,6 @@ export default function AddressForm({ addressId }) {
           </div>
         </div>
 
-        {/* FORM SECTION */}
         <div className="form-section">
           <form onSubmit={handleSubmit}>
             <div className="type-selector">

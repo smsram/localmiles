@@ -10,7 +10,9 @@ const {
   processPayment,
   getMyShipments,
   deletePackage,
-  cancelOrder
+  cancelOrder,
+  getAvailableJobs,
+  getCourierActivities
 } = require('../../controllers/package.controller');
 
 // ==========================================
@@ -42,5 +44,9 @@ router.get('/:id', protect, getPackageByPublicId);
 router.delete('/:id', protect, deletePackage);
 
 router.post('/:id/cancel', protect, cancelOrder);
+
+router.get('/available', protect, getAvailableJobs);
+
+router.get('/courier/activities', protect, getCourierActivities);
 
 module.exports = router;

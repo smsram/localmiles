@@ -516,3 +516,79 @@ exports.cancelOrder = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to cancel order." });
   }
 };
+
+// NEW: Get Available Jobs for Couriers
+exports.getAvailableJobs = async (req, res) => {
+  try {
+    // 'PENDING' strictly filters out 'DRAFT', 'ASSIGNED', 'CANCELLED', etc.
+    // 'courierId: null' guarantees no one else has claimed it yet.
+    const availablePackages = await prisma.package.findMany({
+      where: { 
+        status: 'PENDING',
+        courierId: null 
+      },
+      select: {
+        id: true,
+        publicId: true,
+        title: true,
+        category: true,
+        pickupAddress: true,
+        pickupLat: true,
+        pickupLng: true,
+        dropAddress: true,
+        dropLat: true,
+        dropLng: true,
+        weight: true,
+        price: true, // The total amount paid by sender
+        driverFee: true, // The actual amount the courier earns
+        distanceKm: true,
+        createdAt: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Map driverFee to 'price' so the frontend job cards automatically show the courier's cut
+    const formattedPackages = availablePackages.map(pkg => ({
+      ...pkg,
+      price: pkg.driverFee > 0 ? pkg.driverFee : pkg.price 
+    }));
+
+    res.status(200).json({ success: true, data: formattedPackages });
+  } catch (error) {
+    console.error("Get Available Jobs Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch available jobs." });
+  }
+};
+
+// Get Courier Activities (Active, Scheduled, History)
+exports.getCourierActivities = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 1. Active Jobs (In Progress)
+    const activeJobs = await prisma.package.findMany({
+      where: { courierId: userId, status: { in: ['PICKED_UP', 'IN_TRANSIT'] } },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    // 2. Scheduled Jobs (Assigned but not yet picked up)
+    const scheduledJobs = await prisma.package.findMany({
+      where: { courierId: userId, status: 'ASSIGNED' },
+      orderBy: { scheduledDate: 'asc', createdAt: 'desc' }
+    });
+
+    // 3. History Jobs (Completed or Cancelled)
+    const historyJobs = await prisma.package.findMany({
+      where: { courierId: userId, status: { in: ['DELIVERED', 'CANCELLED'] } },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      data: { activeJobs, scheduledJobs, historyJobs } 
+    });
+  } catch (error) {
+    console.error("Get Courier Activities Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch activities." });
+  }
+};

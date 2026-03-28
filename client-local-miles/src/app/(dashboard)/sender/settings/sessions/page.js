@@ -10,8 +10,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
+// Components
 import ToastNotification from '@/components/ui/ToastNotification';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import Skeleton from '@/components/ui/Skeleton';
+
 import '@/styles/SettingsPage.css';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -50,7 +53,7 @@ export default function ActiveSessionsPage() {
   const fetchSessions = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return router.push('/auth/login');
+      if (!token) return router.push('/login');
 
       const res = await fetch(`${API_URL}/auth/sessions`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -65,7 +68,8 @@ export default function ActiveSessionsPage() {
     } catch (err) {
       setToast({ show: true, message: "Network error", type: 'error' });
     } finally {
-      setLoading(false);
+      // Small delay for smooth skeleton transition
+      setTimeout(() => setLoading(false), 600);
     }
   };
 
@@ -84,7 +88,7 @@ export default function ActiveSessionsPage() {
       let body = {};
 
       if (action === 'REVOKE_ALL') {
-        endpoint = '/auth/revoke-sessions'; // Revokes all OTHER sessions
+        endpoint = '/auth/revoke-sessions';
       } else if (action === 'REVOKE_ONE') {
         endpoint = '/auth/revoke-session';
         body = { sessionId: targetId };
@@ -104,7 +108,7 @@ export default function ActiveSessionsPage() {
       if (res.ok) {
         setToast({ show: true, message: data.message || "Session revoked successfully", type: 'success' });
         setConfirmModal({ isOpen: false, action: null, targetId: null, isProcessing: false });
-        fetchSessions(); // Refresh list
+        fetchSessions(); 
       } else {
         setToast({ show: true, message: data.message || "Failed to revoke session", type: 'error' });
         setConfirmModal(prev => ({ ...prev, isProcessing: false }));
@@ -115,26 +119,36 @@ export default function ActiveSessionsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="page-container settings-page" style={{display: 'flex', justifyContent: 'center', paddingTop: '100px'}}>
-        <div className="spinner" style={{width: 40, height: 40, border: '3px solid var(--border-light)', borderTopColor: 'var(--brand-gold)', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
-      </div>
-    );
-  }
-
   const otherSessionsCount = sessions.filter(s => !s.isCurrent).length;
 
+  // --- SKELETON RENDERER ---
+  const renderSkeletons = () => (
+    <div className="sessions-list">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="session-item" style={{ border: 'none' }}>
+          <Skeleton width="50px" height="50px" circle={true} />
+          <div style={{ flex: 1, marginLeft: '20px' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+              <Skeleton width="180px" height="18px" />
+              <Skeleton width="80px" height="18px" borderRadius="12px" />
+            </div>
+            <Skeleton width="250px" height="12px" />
+          </div>
+          <Skeleton width="40px" height="40px" borderRadius="8px" />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="page-container settings-page">
+    <div className="page-container settings-page fade-in">
       
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
         <button 
           onClick={() => router.back()} 
+          className="back-btn-circular"
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: '50%', transition: 'background 0.2s' }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-page)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
         >
           <ArrowLeftIcon width={24} />
         </button>
@@ -144,23 +158,22 @@ export default function ActiveSessionsPage() {
         </div>
       </div>
 
-      <div className="settings-card fade-in">
+      <div className="settings-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <h2 className="card-title" style={{ margin: 0 }}>
             <ShieldCheckIcon width={24} style={{ display: 'inline', color: 'var(--brand-gold)', marginRight: '8px' }}/> 
             Your Devices
           </h2>
           
-          {otherSessionsCount > 0 && (
+          {!loading && otherSessionsCount > 0 && (
             <button 
               onClick={() => setConfirmModal({ isOpen: true, action: 'REVOKE_ALL', targetId: null })}
+              className="revoke-all-btn"
               style={{
                 padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444',
                 border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = 'white'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#EF4444'; }}
             >
               Log out of all other devices
             </button>
@@ -168,8 +181,12 @@ export default function ActiveSessionsPage() {
         </div>
 
         <div className="sessions-list">
-          {sessions.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>No active sessions found.</p>
+          {loading ? (
+            renderSkeletons()
+          ) : sessions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+               <p style={{ color: 'var(--text-muted)' }}>No active sessions found.</p>
+            </div>
           ) : (
             sessions.map((session) => {
               const device = parseDevice(session.userAgent);
@@ -207,7 +224,6 @@ export default function ActiveSessionsPage() {
                       <TrashIcon width={20} />
                     </button>
                   )}
-
                 </div>
               );
             })
@@ -236,7 +252,6 @@ export default function ActiveSessionsPage() {
         type={toast.type}
         onClose={() => setToast(prev => ({ ...prev, show: false }))}
       />
-
     </div>
   );
 }

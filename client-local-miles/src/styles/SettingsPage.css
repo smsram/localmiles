@@ -324,3 +324,82 @@
   .session-item { flex-wrap: wrap; }
   .revoke-btn { margin-top: 16px; width: 100%; }
 }
+
+/* Update Password Button Styling */
+.btn-update-password {
+  padding: 12px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.btn-update-password:hover:not(:disabled) {
+  border-color: var(--brand-gold);
+}
+
+/* Reset Link Button */
+.btn-reset-link {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--brand-gold);
+  color: #171717;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-reset-link:disabled {
+  background: var(--border-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* View Sessions Button */
+.btn-view-sessions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--brand-gold);
+  border: none;
+  border-radius: 8px;
+  color: #171717;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-view-sessions:hover {
+  transform: translateY(-2px);
+}
+
+/* Theme Fix for Input Focus (Prevents white box issue) */
+.input-field {
+  background: var(--bg-page);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+}
+
+.input-field:focus {
+  background: var(--bg-page) !important; /* Forces background to stay themed */
+  border-color: var(--brand-gold);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.back-btn-circular:hover {
+  background-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+.revoke-all-btn:hover {
+  background: #EF4444 !important;
+  color: white !important;
+  border-color: #EF4444 !important;
+}

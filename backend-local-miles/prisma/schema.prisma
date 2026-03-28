@@ -3,39 +3,47 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id                   String         @id @default(uuid())
+  id                   String          @id @default(uuid())
   fullName             String
-  email                String         @unique
+  email                String          @unique
   passwordHash         String?
-  phone                String?        @unique
-  isPhoneVerified      Boolean        @default(false)
+  phone                String?         @unique
+  isPhoneVerified      Boolean         @default(false)
   emailVerified        DateTime?
   avatarUrl            String?
-  role                 UserRole       @default(USER)
-  courierStatus        CourierStatus  @default(NONE)
-  lastActiveMode       AppMode        @default(SENDER)
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  role                 UserRole        @default(USER)
+  courierStatus        CourierStatus   @default(NONE)
+  lastActiveMode       AppMode         @default(SENDER)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
   primaryGoal          UserIntent?
   resetPasswordExpires DateTime?
-  resetPasswordToken   String?        @unique
-  publicId             String         @unique
-  walletBalance        Float          @default(0.0)
-  emailAlerts          Boolean        @default(false)
-  language             String         @default("english_in")
-  pushNotifications    Boolean        @default(true)
+  resetPasswordToken   String?         @unique
+  publicId             String          @unique
+  walletBalance        Float           @default(0.0)
+  emailAlerts          Boolean         @default(false)
+  language             String          @default("english_in")
+  pushNotifications    Boolean         @default(true)
+  
+  courierProfile       CourierProfile?
   accounts             Account[]
   otps                 Otp[]
-  courierJobs          Package[]      @relation("CourierJobs")
-  sentPackages         Package[]      @relation("SenderPackages")
+  courierJobs          Package[]       @relation("CourierJobs")
+  sentPackages         Package[]       @relation("SenderPackages")
   savedAddresses       SavedAddress[]
   sessions             Session[]
   transactions         Transaction[]
+  courierRoutes        CourierRoute[]
+  
+  // Reviews relations
+  reviewsGiven         CourierReview[] @relation("ReviewSender")
+  reviewsReceived      CourierReview[] @relation("ReviewCourier")
 
   @@map("users")
 }
@@ -185,10 +193,86 @@ model Transaction {
   method      TransactionMethod
   description String?
   referenceId String?
+  appMode     AppMode           @default(SENDER)
   createdAt   DateTime          @default(now())
   user        User              @relation(fields: [userId], references: [id])
 
   @@map("transactions")
+}
+
+model CourierRoute {
+  id              String   @id @default(uuid())
+  userId          String
+  title           String   @default("Custom Route")
+  pickupAddress   String
+  pickupLat       Float
+  pickupLng       Float
+  dropoffAddress  String
+  dropoffLat      Float
+  dropoffLng      Float
+  time            String
+  isRecurring     Boolean  @default(false)
+  maxDetourKm     Float    @default(2.5)
+  vehicleCapacity String   @default("backpack")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("courier_routes")
+}
+
+model CourierProfile {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  
+  // Vehicle Details
+  vehicleModel      String?   @default("Not Set")
+  vehicleColor      String?   @default("Not Set")
+  fuelType          String?   @default("Not Set")
+  regYear           String?   @default("Not Set")
+  plateNumber       String?   @default("NOT SET")
+  vehicleImage      String?
+  
+  // Document URLs
+  rcBookUrl         String?
+  insuranceUrl      String?
+  pollutionUrl      String?
+  aadhaarUrl        String?
+  dlUrl             String?
+  
+  // Verification Flags (Updated by Admin/Portal)
+  rcVerified        Boolean   @default(false)
+  insuranceVerified Boolean   @default(false)
+  pollutionVerified Boolean   @default(false)
+  aadhaarVerified   Boolean   @default(false)
+  dlVerified        Boolean   @default(false)
+  bgVerified        Boolean   @default(false) // Background Check
+  
+  // Rating Aggregation Cache
+  averageRating     Float     @default(0.0)
+  totalReviews      Int       @default(0)
+
+  updatedAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("courier_profiles")
+}
+
+model CourierReview {
+  id          String   @id @default(uuid())
+  courierId   String
+  senderId    String
+  packageId   String?  @unique // Link to the specific delivery
+  rating      Float    // 1.0 to 5.0
+  reviewText  String?
+  createdAt   DateTime @default(now())
+
+  courier     User     @relation("ReviewCourier", fields: [courierId], references: [id], onDelete: Cascade)
+  sender      User     @relation("ReviewSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("courier_reviews")
 }
 
 enum UserRole {

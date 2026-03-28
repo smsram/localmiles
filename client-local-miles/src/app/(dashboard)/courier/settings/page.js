@@ -1,40 +1,196 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
-  AdjustmentsHorizontalIcon,
-  BellAlertIcon,
   ShieldCheckIcon,
-  MapIcon,
-  MoonIcon,
-  SpeakerWaveIcon,
-  LockClosedIcon,
   QuestionMarkCircleIcon,
   DocumentTextIcon,
   ArrowRightOnRectangleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  LockClosedIcon,
+  UserIcon,
+  TruckIcon,
+  WalletIcon,
+  XMarkIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
-import { 
-  MapIcon as MapSolid 
-} from '@heroicons/react/24/solid';
 
-// Import Theme-Ready CSS
+// Components
+import ToastNotification from '@/components/ui/ToastNotification';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import '@/styles/CourierSettingsPage.css';
 
-export default function CourierSettingsPage() {
-  // State for controls
-  const [navProvider, setNavProvider] = useState('google');
-  const [language, setLanguage] = useState('en-in');
-  const [darkMode, setDarkMode] = useState(false);
-  const [jobAlerts, setJobAlerts] = useState(true);
-  const [communityUpdates, setCommunityUpdates] = useState(false);
-  const [volume, setVolume] = useState(80);
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// --- PASSWORD MANAGEMENT MODAL ---
+function PasswordModal({ isOpen, onClose, userEmail, onToast }) {
+  const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+  const [isChanging, setIsChanging] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [view, setView] = useState('change'); // 'change' or 'reset'
+
+  if (!isOpen) return null;
+
+  const handleChangeSubmit = async (e) => {
+    e.preventDefault();
+    if (passwords.new !== passwords.confirm) {
+      return onToast("New passwords do not match", "error");
+    }
+    
+    setIsChanging(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: passwords.current, newPassword: passwords.new })
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        onToast("Password updated successfully!", "success");
+        onClose();
+        setPasswords({ current: '', new: '', confirm: '' });
+      } else {
+        onToast(data.message || "Failed to update password", "error");
+      }
+    } catch (err) {
+      onToast("Network error occurred", "error");
+    } finally {
+      setIsChanging(false);
+    }
+  };
+
+  const handleSendReset = async () => {
+    setIsSendingReset(true);
+    try {
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail })
+      });
+      
+      if (res.ok) {
+        onToast(`Reset link sent to ${userEmail}`, "success");
+        onClose();
+      } else {
+        const data = await res.json();
+        onToast(data.message || "Failed to send link", "error");
+      }
+    } catch (err) {
+      onToast("Network error occurred", "error");
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
 
   return (
-    <div className="page-container settings-page">
+    <div className="modal-overlay" style={{ zIndex: 9999 }}>
+      <div className="modal-content fade-in" style={{ maxWidth: '450px' }}>
+        <div className="modal-header">
+          <h3>{view === 'change' ? 'Change Password' : 'Reset Password'}</h3>
+          <button onClick={onClose} className="close-modal-btn"><XMarkIcon className="icon-24" /></button>
+        </div>
+        
+        <div className="modal-body">
+          {view === 'change' ? (
+            <form onSubmit={handleChangeSubmit}>
+              <div className="form-group">
+                <label className="form-label">Current Password</label>
+                <input type="password" value={passwords.current} onChange={(e) => setPasswords({...passwords, current: e.target.value})} className="input-field" required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input type="password" value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})} className="input-field" required minLength={6} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} className="input-field" required minLength={6} />
+              </div>
+              
+              <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={isChanging}>
+                {isChanging ? 'Updating...' : 'Update Password'}
+              </button>
+              
+              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <button type="button" onClick={() => setView('reset')} style={{ background: 'none', border: 'none', color: 'var(--brand-gold)', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+                  Forgot Password? Send Reset Link
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <EnvelopeIcon style={{ width: 48, color: 'var(--brand-gold)', margin: '0 auto 16px' }} />
+              <p style={{ color: 'var(--text-main)', marginBottom: '24px', lineHeight: 1.5 }}>
+                We will send a secure password reset link to your registered email address:<br/>
+                <strong>{userEmail}</strong>
+              </p>
+              <button onClick={handleSendReset} className="btn-primary" style={{ width: '100%', marginBottom: '12px' }} disabled={isSendingReset}>
+                {isSendingReset ? 'Sending...' : 'Send Reset Link'}
+              </button>
+              <button onClick={() => setView('change')} className="btn-secondary" style={{ width: '100%' }}>
+                Back to Change Password
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- MAIN PAGE ---
+export default function CourierSettingsPage() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  // UI States
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
+
+  const triggerToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+  };
+
+  // --- LOGOUT EXECUTION (Matches Sidebar) ---
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+      } catch (error) { console.error("Backend logout failed:", error); }
+    }
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    triggerToast('Logged out successfully!', 'success');
+    setShowLogoutConfirm(false);
+    
+    setTimeout(() => {
+      router.push('/login');
+    }, 1000);
+  };
+
+  return (
+    <div className="page-container settings-page fade-in">
       
       {/* 1. HEADER */}
       <div className="page-header">
-        <h1 className="page-title">App Settings</h1>
+        <h1 className="page-title">Settings</h1>
         <div className="status-badge">
           <div className="status-dot"></div>
           ONLINE
@@ -43,184 +199,106 @@ export default function CourierSettingsPage() {
 
       <div className="settings-grid">
         
-        {/* CARD 1: APP PREFERENCES */}
+        {/* CARD 1: ACCOUNT SHORTCUTS */}
         <div className="settings-card">
           <div className="card-title">
-            <AdjustmentsHorizontalIcon className="title-icon" />
-            App Preferences
-          </div>
-
-          {/* Nav Provider */}
-          <div>
-            <div className="pref-section-label">Navigation Provider</div>
-            <div className="nav-toggle-group">
-              <div 
-                className={`nav-option ${navProvider === 'google' ? 'active' : ''}`}
-                onClick={() => setNavProvider('google')}
-              >
-                {navProvider === 'google' && <div className="active-dot"></div>}
-                <MapSolid className="nav-icon" />
-                <span className="nav-label">Google Maps</span>
-              </div>
-              
-              <div 
-                className={`nav-option ${navProvider === 'waze' ? 'active' : ''}`}
-                onClick={() => setNavProvider('waze')}
-              >
-                {navProvider === 'waze' && <div className="active-dot"></div>}
-                <MapIcon className="nav-icon" /> 
-                <span className="nav-label">Waze</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Language */}
-          <div>
-            <div className="pref-section-label">App Language</div>
-            <select 
-              className="lang-select" 
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              <option value="en-in">English (India)</option>
-              <option value="en-us">English (US)</option>
-              <option value="hi">Hindi</option>
-              <option value="ta">Tamil</option>
-            </select>
-          </div>
-
-          {/* Dark Mode */}
-          <div className="toggle-row">
-            <div className="row-label">
-              <MoonIcon style={{ width: 20, color: 'var(--text-muted)' }} />
-              Dark Mode
-            </div>
-            <label className="switch">
-              <input 
-                type="checkbox" 
-                checked={darkMode}
-                onChange={() => setDarkMode(!darkMode)}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        {/* CARD 2: NOTIFICATIONS */}
-        <div className="settings-card">
-          <div className="card-title">
-            <BellAlertIcon className="title-icon" />
-            Notifications
-          </div>
-
-          {/* Job Alerts */}
-          <div className="notif-item">
-            <div className="notif-text">
-              <h4>Job Alerts</h4>
-              <p>High priority push notifications</p>
-            </div>
-            <label className="switch">
-              <input 
-                type="checkbox" 
-                checked={jobAlerts}
-                onChange={() => setJobAlerts(!jobAlerts)}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-
-          {/* Volume Slider */}
-          <div className="volume-control">
-            <div className="vol-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SpeakerWaveIcon style={{ width: 18 }} /> Alert Volume
-              </span>
-              <span className="vol-percent">{volume}%</span>
-            </div>
-            <input 
-              type="range" 
-              min="0" max="100" 
-              value={volume} 
-              onChange={(e) => setVolume(e.target.value)}
-              className="vol-slider"
-            />
-            <div className="vol-labels">
-              <span>SILENT</span>
-              <span>MAX</span>
-            </div>
-          </div>
-
-          {/* Community Updates */}
-          <div className="toggle-row" style={{ marginTop: 'auto' }}>
-            <div className="notif-text">
-              <h4 style={{ fontSize: '0.9rem' }}>Community Updates</h4>
-              <p>Newsletters & Events</p>
-            </div>
-            <label className="switch">
-              <input 
-                type="checkbox" 
-                checked={communityUpdates}
-                onChange={() => setCommunityUpdates(!communityUpdates)}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        {/* CARD 3: ACCOUNT & SUPPORT */}
-        <div className="settings-card">
-          <div className="card-title">
-            <ShieldCheckIcon className="title-icon" />
-            Account & Support
+            <UserIcon className="title-icon" />
+            Quick Actions
           </div>
 
           <div className="menu-list">
-            
-            <div className="menu-item">
+            <Link href="/courier/profile" className="menu-item">
               <div className="menu-left">
-                <div className="menu-icon-bg bg-blue">
-                  <LockClosedIcon style={{ width: 18 }} />
-                </div>
+                <div className="menu-icon-bg bg-blue"><TruckIcon style={{ width: 18 }} /></div>
+                <span>Profile & Vehicle Details</span>
+              </div>
+              <ChevronRightIcon style={{ width: 16, color: 'var(--text-muted)' }} />
+            </Link>
+
+            <Link href="/courier/earnings" className="menu-item">
+              <div className="menu-left">
+                <div className="menu-icon-bg bg-orange"><WalletIcon style={{ width: 18 }} /></div>
+                <span>Earnings & Wallet</span>
+              </div>
+              <ChevronRightIcon style={{ width: 16, color: 'var(--text-muted)' }} />
+            </Link>
+          </div>
+        </div>
+
+        {/* CARD 2: SECURITY & SUPPORT */}
+        <div className="settings-card">
+          <div className="card-title">
+            <ShieldCheckIcon className="title-icon" />
+            Security & Support
+          </div>
+
+          <div className="menu-list">
+            <div className="menu-item" onClick={() => setShowPasswordModal(true)}>
+              <div className="menu-left">
+                <div className="menu-icon-bg bg-purple"><LockClosedIcon style={{ width: 18 }} /></div>
                 <span>Change Password</span>
               </div>
               <ChevronRightIcon style={{ width: 16, color: 'var(--text-muted)' }} />
             </div>
 
-            <div className="menu-item">
+            <Link href="/help" className="menu-item">
               <div className="menu-left">
-                <div className="menu-icon-bg bg-purple">
+                <div className="menu-icon-bg" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
                   <QuestionMarkCircleIcon style={{ width: 18 }} />
                 </div>
                 <span>Help & Support</span>
               </div>
               <ChevronRightIcon style={{ width: 16, color: 'var(--text-muted)' }} />
-            </div>
+            </Link>
 
-            <div className="menu-item">
+            <Link href="/legal/terms" className="menu-item">
               <div className="menu-left">
-                <div className="menu-icon-bg bg-orange">
+                <div className="menu-icon-bg" style={{ background: 'rgba(75, 85, 99, 0.1)', color: '#4B5563' }}>
                   <DocumentTextIcon style={{ width: 18 }} />
                 </div>
-                <span>Legal</span>
+                <span>Legal & Terms</span>
               </div>
               <ChevronRightIcon style={{ width: 16, color: 'var(--text-muted)' }} />
-            </div>
-
-          </div>
-
-          <div className="logout-section">
-            <button className="btn-logout" onClick={() => alert('Logging out...')}>
-              <ArrowRightOnRectangleIcon style={{ width: 20 }} />
-              Log Out
-            </button>
-            <div className="app-version">
-              LOCAL MILES APP <br/> v2.4.0 (Build 102)
-            </div>
+            </Link>
           </div>
         </div>
-
       </div>
 
+      {/* 3. FOOTER LOGOUT & VERSION */}
+      <div className="settings-footer-section">
+        <button className="btn-logout-large" onClick={() => setShowLogoutConfirm(true)}>
+          <ArrowRightOnRectangleIcon style={{ width: 22 }} />
+          Log Out
+        </button>
+        <div className="app-version-large">
+          LOCAL MILES APP<br/>v2.4.0 (Build 102)
+        </div>
+      </div>
+
+      {/* MODALS */}
+      <PasswordModal 
+        isOpen={showPasswordModal} 
+        onClose={() => setShowPasswordModal(false)} 
+        userEmail={user?.email} 
+        onToast={triggerToast} 
+      />
+
+      <ConfirmModal 
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to end your session? You will need to log in again."
+        confirmText="Logout"
+        cancelText="Cancel"
+        isDanger={true}
+        isLoading={isLoggingOut}
+      />
+
+      <ToastNotification 
+        show={toast.show} message={toast.message} type={toast.type} 
+        onClose={() => setToast({ ...toast, show: false })} 
+      />
     </div>
   );
 }

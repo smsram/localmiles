@@ -9,10 +9,13 @@ import {
 } from '@heroicons/react/24/outline';
 import MapPicker from '@/components/ui/MapPicker';
 import Dropdown from '@/components/ui/Dropdown';
-import ImageGallery from '@/components/ui/ImageGallery'; // <-- Import the Gallery
+import ImageGallery from '@/components/ui/ImageGallery';
+import ToastNotification from '@/components/ui/ToastNotification';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import Skeleton from '@/components/ui/Skeleton';
 import '@/styles/SendPackage.css';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const determineSize = (weight, length, width, height) => {
   if (length === 0 && width === 0 && height === 0) return weight <= 1 ? 'ENVELOPE' : 'SMALL_BOX';
@@ -70,7 +73,7 @@ function LocationModal({ mode, savedAddresses, onClose, onConfirm }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content large">
+      <div className="modal-content large fade-in">
         <div className="modal-header">
           <h3>Select {mode === 'pickup' ? 'Pickup' : 'Drop'} Location</h3>
           <button onClick={onClose} className="close-modal-btn"><XMarkIcon className="icon-24" /></button>
@@ -121,6 +124,12 @@ export default function SendPackagePage() {
 
   const fileInputRef = useRef(null);
   
+  // UI State
+  const [loading, setLoading] = useState(!!editId); // Only show page loader if editing
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, action: null });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '', description: '', 
     category: 'DOCUMENTS', otherCategory: '', declaredValue: '', 
@@ -166,8 +175,8 @@ export default function SendPackagePage() {
           if (data.success) {
             const pkg = data.data;
             if (pkg.status !== 'DRAFT') {
-              alert("Only drafts can be edited.");
-              router.push('/dashboard');
+              setToast({ show: true, message: "Only drafts can be edited.", type: 'error' });
+              setTimeout(() => router.push('/dashboard'), 1500);
               return;
             }
             setFormData({
@@ -184,7 +193,11 @@ export default function SendPackagePage() {
             setPrice(pkg.price);
             setExistingImages(pkg.images || []); 
           }
-        } catch (err) { console.error("Failed to load draft"); }
+        } catch (err) { 
+          setToast({ show: true, message: "Failed to load draft", type: 'error' });
+        } finally {
+          setLoading(false);
+        }
       };
       fetchDraft();
     }
@@ -278,14 +291,13 @@ export default function SendPackagePage() {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const totalCount = existingImages.length + newImageFiles.length + files.length;
-    if (totalCount > 10) return alert("Maximum 10 images allowed.");
+    if (totalCount > 10) return setToast({ show: true, message: "Maximum 10 images allowed.", type: 'error' });
     
     setNewImageFiles(prev => [...prev, ...files]);
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setNewImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
-  // Map state to unified gallery format
   const galleryImages = [
     ...existingImages.map(img => ({ id: img.id, url: img.url, type: 'existing' })),
     ...newImagePreviews.map((url, i) => ({ id: `new-${i}`, url, type: 'new', index: i }))
@@ -302,10 +314,17 @@ export default function SendPackagePage() {
   };
 
   // --- SUBMIT ---
-  const handleSubmit = async () => {
-    if (!formData.safetyCheck) return alert("Please confirm safety check.");
-    if (!formData.pickupAddress || !formData.dropAddress) return alert("Please select locations.");
-    if (formData.declaredValue > 50000) return alert("Declared value exceeds limit.");
+  const triggerSubmit = () => {
+    if (!formData.safetyCheck) return setToast({ show: true, message: "Please confirm safety check.", type: 'error' });
+    if (!formData.pickupAddress || !formData.dropAddress) return setToast({ show: true, message: "Please select locations.", type: 'error' });
+    if (formData.declaredValue > 50000) return setToast({ show: true, message: "Declared value exceeds limit.", type: 'error' });
+    
+    setConfirmModal({ isOpen: true, action: 'submit' });
+  };
+
+  const executeSubmit = async () => {
+    setIsSubmitting(true);
+    setConfirmModal({ isOpen: false, action: null });
     
     try {
       const token = localStorage.getItem('token');
@@ -333,16 +352,75 @@ export default function SendPackagePage() {
 
       const data = await res.json();
       if (data.success) {
+        setToast({ show: true, message: "Draft saved successfully!", type: 'success' });
         const targetId = editId ? editId : data.data.publicId;
-        router.push(`/sender/send/checkout/${targetId}`); 
+        setTimeout(() => router.push(`/sender/send/checkout/${targetId}`), 1000); 
       } else {
-        alert(data.message || "Failed to save draft");
+        setToast({ show: true, message: data.message || "Failed to save draft", type: 'error' });
+        setIsSubmitting(false);
       }
-    } catch (error) { console.error(error); alert("Failed to save shipment."); }
+    } catch (error) { 
+        setToast({ show: true, message: "Failed to save shipment.", type: 'error' });
+        setIsSubmitting(false);
+    }
   };
 
+  // --- SKELETON RENDERER ---
+  const renderSkeletons = () => (
+    <div className="send-package-container fade-in">
+      <div className="page-header">
+         <Skeleton width="250px" height="32px" style={{ marginBottom: '8px' }} />
+         <Skeleton width="400px" height="16px" />
+      </div>
+      <div className="dashboard-grid">
+        <div className="main-content">
+          {/* Card 1 */}
+          <div className="card form-section" style={{ padding: '24px' }}>
+             <div className="section-header-group" style={{ marginBottom: '24px' }}>
+                <Skeleton width="30px" height="30px" circle={true} />
+                <Skeleton width="180px" height="24px" style={{ marginLeft: '12px' }} />
+             </div>
+             <Skeleton width="40%" height="14px" style={{ marginBottom: '8px' }} />
+             <Skeleton width="100%" height="45px" borderRadius="8px" style={{ marginBottom: '20px' }} />
+             <Skeleton width="40%" height="14px" style={{ marginBottom: '8px' }} />
+             <Skeleton width="100%" height="80px" borderRadius="8px" style={{ marginBottom: '20px' }} />
+          </div>
+          {/* Card 2 */}
+          <div className="card form-section" style={{ padding: '24px' }}>
+             <div className="section-header-group" style={{ marginBottom: '24px' }}>
+                <Skeleton width="30px" height="30px" circle={true} />
+                <Skeleton width="180px" height="24px" style={{ marginLeft: '12px' }} />
+             </div>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                 <Skeleton width="100%" height="45px" borderRadius="8px" />
+                 <Skeleton width="100%" height="45px" borderRadius="8px" />
+             </div>
+             <Skeleton width="100%" height="45px" borderRadius="8px" style={{ marginBottom: '20px' }} />
+          </div>
+        </div>
+        <div className="right-sidebar">
+          <div className="card route-card" style={{ padding: '24px' }}>
+             <Skeleton width="100px" height="24px" style={{ marginBottom: '24px' }} />
+             <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+                 <Skeleton width="20px" height="20px" circle={true} />
+                 <Skeleton width="100%" height="45px" borderRadius="8px" />
+             </div>
+             <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+                 <Skeleton width="20px" height="20px" circle={true} />
+                 <Skeleton width="100%" height="45px" borderRadius="8px" />
+             </div>
+             <Skeleton width="100%" height="1px" style={{ margin: '24px 0' }} />
+             <Skeleton width="100%" height="45px" borderRadius="8px" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return renderSkeletons();
+
   return (
-    <div className="send-package-container">
+    <div className="send-package-container fade-in">
       <div className="page-header"><h1>{editId ? 'Edit Package' : 'Send a Package'}</h1><p>Fill in the details below to match with a local courier.</p></div>
       <div className="dashboard-grid">
         
@@ -364,7 +442,7 @@ export default function SendPackagePage() {
               <ImageGallery 
                 images={galleryImages} 
                 onRemove={handleRemoveImage}
-                cloudName={cloudName} // Pass cloud name for formatting
+                cloudName={cloudName} 
                 appendComponent={
                   galleryImages.length < 10 && (
                     <div 
@@ -476,14 +554,35 @@ export default function SendPackagePage() {
                   </button>
                 </div>
               </div>
-              <button className="btn-find" onClick={handleSubmit} disabled={!formData.safetyCheck || !price || (valueError?.type === 'error')}>
-                {editId ? 'Save Changes' : 'Proceed'} <ArrowRightIcon className="icon-20" />
+              <button 
+                className="btn-find" 
+                onClick={triggerSubmit} 
+                disabled={!formData.safetyCheck || !price || (valueError?.type === 'error') || isSubmitting}
+              >
+                {isSubmitting ? 'Processing...' : (editId ? 'Save Changes' : 'Proceed')} <ArrowRightIcon className="icon-20" />
               </button>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* UI Modals */}
       {modalMode && <LocationModal mode={modalMode} savedAddresses={savedAddresses} onClose={() => setModalMode(null)} onConfirm={handleLocationConfirm} />}
+      
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, action: null })}
+        onConfirm={executeSubmit}
+        title="Confirm Shipment Details"
+        message="Are you sure you want to proceed? This will save your package details and take you to checkout."
+        confirmText="Yes, Proceed"
+        cancelText="Review Again"
+      />
+
+      <ToastNotification 
+        show={toast.show} message={toast.message} type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 }

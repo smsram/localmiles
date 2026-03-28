@@ -506,3 +506,77 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- INPUTS & BUTTONS --- */
+.input-field {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.btn-primary {
+  background: var(--brand-gold);
+  color: #171717;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
+
+.btn-upload-sm {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--brand-gold);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-upload-sm:hover { background: rgba(212, 175, 55, 0.2); }
+
+.vehicle-img-upload-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+.vehicle-img-upload-btn:hover { transform: scale(1.05); color: var(--brand-gold); }
+
+/* Reviewing / Yellow Status Colors */
+.bg-yellow-light { background: rgba(234, 179, 8, 0.1); color: #EAB308; }
+.text-yellow { color: #EAB308; }

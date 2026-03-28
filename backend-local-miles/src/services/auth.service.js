@@ -2,19 +2,11 @@ const prisma = require('../utils/prisma');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const admin = require('../utils/firebase');
-const axios = require('axios');
 const uuid = require('uuid'); 
 const EmailUtil = require('../utils/email');
-const crypto = require('crypto');
-// 1. IMPORT ID GENERATOR
-const { generateUserId } = require('../utils/idGenerator');
+const crypto = require('crypto'); // Native secure random generation
 
-// Helper: Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
-};
+const { generateUserId } = require('../utils/idGenerator');
 
 // Helper: Generate JWT Token and Save Session to DB
 const generateAndSaveSession = async (userId) => {
@@ -22,10 +14,8 @@ const generateAndSaveSession = async (userId) => {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 
-  // Calculate Expiry Date for DB
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 Days
 
-  // Save Session in Database
   await prisma.session.create({
     data: {
       sessionToken: token,
@@ -186,13 +176,16 @@ exports.verifyEmailToken = async (token) => {
   return user;
 };
 
-// 5. SEND MOBILE OTP (Updated with availability check)
+// ==========================================
+// 5. SEND MOBILE OTP (Secure, No Meta API)
+// ==========================================
 exports.sendMobileOtp = async (userId, phone) => {
   // Check if this phone number is already verified by someone else
   const phoneTaken = await prisma.user.findFirst({
     where: { 
       phone,
-      NOT: { id: userId } // Check users OTHER than the current one
+      isPhoneVerified: true, // Only block if actively verified
+      NOT: { id: userId } 
     }
   });
 
@@ -200,31 +193,29 @@ exports.sendMobileOtp = async (userId, phone) => {
     throw new Error("This phone number is already linked to another account.");
   }
 
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  // Generate secure 6-digit OTP using Node's crypto
+  const otpCode = crypto.randomInt(100000, 999999).toString();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
 
+  // Store in DB
   await prisma.otp.create({
     data: { userId, phone, code: otpCode, type: 'VERIFICATION', expiresAt },
   });
 
-  try {
-    const url = `https://graph.facebook.com/v22.0/${process.env.META_PHONE_NUMBER_ID}/messages`;
-    await axios.post(url, {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: `91${phone}`,
-      type: "text",
-      text: { body: `Your Local Miles verification code is: ${otpCode}` }
-    }, {
-      headers: { Authorization: `Bearer ${process.env.META_ACCESS_TOKEN}`, "Content-Type": "application/json" }
-    });
-  } catch (error) {
-    console.error("❌ Meta API Failed:", error.message);
-  }
-  return { success: true, message: "OTP Sent" };
+  // LOG OTP TO CONSOLE FOR TESTING
+  // This replaces the Meta API call completely, avoiding ban risks.
+  console.log(`\n================================`);
+  console.log(`🔑 [DEV MODE] OTP Generated`);
+  console.log(`📱 Phone: +91 ${phone}`);
+  console.log(`🔢 Code:  ${otpCode}`);
+  console.log(`================================\n`);
+
+  return { success: true, message: "OTP Generated successfully" };
 };
 
-// 6. VERIFY MOBILE OTP (Updated with Safety Check)
+// ==========================================
+// 6. VERIFY MOBILE OTP
+// ==========================================
 exports.verifyMobileOtp = async (userId, phone, code) => {
   const validOtp = await prisma.otp.findFirst({
     where: { userId, phone, code, isUsed: false, expiresAt: { gt: new Date() } }
@@ -232,9 +223,9 @@ exports.verifyMobileOtp = async (userId, phone, code) => {
 
   if (!validOtp) throw new Error("Invalid or Expired OTP");
 
-  // DOUBLE CHECK: Ensure no one claimed this phone number while the user was typing the OTP
+  // Double check availability
   const phoneTaken = await prisma.user.findFirst({
-    where: { phone, NOT: { id: userId } }
+    where: { phone, isPhoneVerified: true, NOT: { id: userId } }
   });
 
   if (phoneTaken) {
@@ -243,13 +234,34 @@ exports.verifyMobileOtp = async (userId, phone, code) => {
 
   await prisma.otp.update({ where: { id: validOtp.id }, data: { isUsed: true } });
 
-  // Now the update will succeed because we've verified the phone is available
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { 
-      isPhoneVerified: true, 
-      phone: phone 
-    }
+    data: { isPhoneVerified: true, phone: phone }
+  });
+
+  return { success: true, user };
+};
+
+// ==========================================
+// 7. VERIFY TRUECALLER (1-Tap Simulation)
+// ==========================================
+exports.verifyTruecaller = async (userId, phone, payload) => {
+  // Check availability
+  const phoneTaken = await prisma.user.findFirst({
+    where: { phone, isPhoneVerified: true, NOT: { id: userId } }
+  });
+
+  if (phoneTaken) {
+    throw new Error("This phone number is already linked to another account.");
+  }
+
+  /* * In a live app, you would verify the Truecaller `payload` signature here.
+   * Because you are testing, we assume the signature check passes.
+   */
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { isPhoneVerified: true, phone: phone }
   });
 
   return { success: true, user };

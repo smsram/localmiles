@@ -77,6 +77,7 @@ export default function Sidebar() {
     { name: 'Post Route', href: '/courier/route', icon: MapPinIcon }, 
     { name: 'Find Jobs', href: '/courier/jobs', icon: MapIcon },
     { name: 'My Activities', href: '/courier/activities', icon: ClipboardDocumentListIcon },
+    { name: 'Address Book', href: '/courier/address', icon: BookOpenIcon },
     { name: 'Earnings', href: '/courier/earnings', icon: WalletIcon },
     { name: 'My Profile', href: '/courier/profile', icon: UserCircleIcon },
     { name: 'Settings', href: '/courier/settings', icon: Cog6ToothIcon },
@@ -99,7 +100,6 @@ export default function Sidebar() {
     setIsLoggingOut(true);
     const token = localStorage.getItem('token');
     
-    // A. Notify backend to revoke the session
     if (token) {
       try {
         await fetch(`${API_URL}/auth/logout`, {
@@ -114,16 +114,14 @@ export default function Sidebar() {
       }
     }
 
-    // B. Clear all Local Storage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
 
-    // C. UI feedback and Redirect
     setToast({ show: true, message: 'Logged out successfully!', type: 'success' });
     setShowLogoutConfirm(false);
     
     setTimeout(() => {
-      router.push('/login'); // Updated to /login as requested
+      router.push('/login');
     }, 1000);
   };
 
@@ -218,7 +216,7 @@ export default function Sidebar() {
           {/* User Profile Card */}
           <div className="user-card">
             <div className="avatar">
-               {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
             </div>
             
             <div className="user-info">
@@ -233,7 +231,6 @@ export default function Sidebar() {
               </span>
             </div>
 
-            {/* Trigger Logout Confirm Modal */}
             <button 
               className="logout-btn" 
               onClick={() => setShowLogoutConfirm(true)} 
@@ -280,22 +277,18 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* --- UI MODALS & NOTIFICATIONS --- */}
-
-      {/* Logout Confirmation Modal */}
       <ConfirmModal 
         isOpen={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
         onConfirm={handleLogout}
         title="Logout"
-        message="Are you sure you want to end your session? You will need to login again to access your account."
+        message="Are you sure you want to end your session?"
         confirmText="Logout"
-        cancelText="Stay Logged In"
+        cancelText="Cancel"
         isDanger={true}
         isLoading={isLoggingOut}
       />
 
-      {/* Logout Toast Notification */}
       <ToastNotification 
         show={toast.show} 
         message={toast.message} 

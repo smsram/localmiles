@@ -218,3 +218,221 @@ input:checked + .slider:before { transform: translateX(22px); }
   .route-form-panel { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-light); }
   .map-panel { width: 100%; height: 500px; flex: none; }
 }
+
+/* =========================================
+   SAVED ADDRESSES MODAL (BOTTOM SHEET)
+========================================= */
+
+.saved-address-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.saved-address-sheet {
+  background: var(--bg-card);
+  width: 100%;
+  max-width: 450px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border-light);
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sheet-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.sheet-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.sheet-close-btn:hover {
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+.sheet-body {
+  padding: 12px;
+}
+
+.saved-list-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Theme-aware Scrollbar for the list */
+.saved-list-scroll::-webkit-scrollbar { width: 6px; }
+.saved-list-scroll::-webkit-scrollbar-thumb { 
+  background-color: var(--border-light); 
+  border-radius: 3px; 
+}
+
+.empty-saved-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.saved-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-card);
+  border: 1px solid transparent;
+}
+
+.saved-list-item:hover {
+  background: var(--bg-page);
+  border-color: var(--border-light);
+}
+
+.saved-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--brand-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.saved-details-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.saved-details-wrapper strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.saved-details-wrapper p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- MOBILE BOTTOM SHEET RESPONSIVENESS --- */
+@media (max-width: 600px) {
+  .saved-address-overlay {
+    align-items: flex-end; /* Push to bottom on mobile */
+  }
+
+  .saved-address-sheet {
+    max-width: 100%;
+    border-radius: 24px 24px 0 0; /* Only round top corners */
+    animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom, 20px); /* iPhone notch support */
+  }
+
+  .saved-list-scroll {
+    max-height: 50vh; /* Don't take up the whole screen */
+  }
+}
+
+/* Animations */
+@keyframes scaleUp {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUpMobile {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* iOS Style Switch */
+.switch { 
+  position: relative; 
+  display: inline-block; 
+  width: 48px; 
+  height: 26px; 
+  flex-shrink: 0; 
+}
+
+/* ADD THIS RULE to hide the default checkbox */
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--border-light); transition: .3s; border-radius: 34px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+  background-color: #fff; transition: .3s; border-radius: 50%;
+}
+.switch input:checked + .slider { background-color: #10B981; }
+.switch input:checked + .slider:before { transform: translateX(22px); }
+
+/* --- UI UTILITIES (Moved from inline React) --- */
+
+@keyframes fadeInDown { 
+  from { opacity: 0; transform: translate(-50%, -10px); } 
+  to { opacity: 1; transform: translate(-50%, 0); } 
+}
+
+.picking-active { 
+  border-color: var(--brand-gold) !important; 
+  background: rgba(212, 175, 55, 0.05) !important; 
+}
+
+.inline { 
+  display: inline; 
+  vertical-align: text-bottom; 
+}

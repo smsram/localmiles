@@ -2,15 +2,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  MagnifyingGlassIcon, CalendarDaysIcon, PlusIcon,
+  MagnifyingGlassIcon, PlusIcon,
   ChevronLeftIcon, ChevronRightIcon
 } from '@heroicons/react/24/outline';
+
+// Components
 import ShipmentCard from '@/components/shipment/ShipmentCard';
 import Dropdown from '@/components/ui/Dropdown';
-import ConfirmModal from '@/components/ui/ConfirmModal'; // <-- IMPORT MODAL
+import ConfirmModal from '@/components/ui/ConfirmModal'; 
+import Skeleton from '@/components/ui/Skeleton'; // <-- IMPORT SKELETON
+
 import '@/styles/ShipmentsPage.css';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ShipmentsPage() {
   const router = useRouter();
@@ -72,6 +76,7 @@ export default function ShipmentsPage() {
 
   useEffect(() => {
     fetchShipments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filterStatus, router]);
 
   // --- ACTIONS ---
@@ -121,6 +126,34 @@ export default function ShipmentsPage() {
     }
   };
 
+  // --- SKELETON RENDERER ---
+  // A helper function to render fake cards while loading
+  const renderSkeletons = () => {
+    return Array.from({ length: 4 }).map((_, index) => (
+      <div key={index} className="shipment-skeleton-card fade-in">
+        <div className="skeleton-row">
+          <Skeleton width="180px" height="24px" borderRadius="6px" />
+          <Skeleton width="90px" height="28px" borderRadius="16px" />
+        </div>
+        <Skeleton width="60%" height="16px" />
+        
+        <div className="skeleton-row" style={{ marginTop: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Skeleton width="40px" height="40px" borderRadius="8px" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Skeleton width="120px" height="14px" />
+              <Skeleton width="150px" height="14px" />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Skeleton width="80px" height="36px" borderRadius="8px" />
+            <Skeleton width="100px" height="36px" borderRadius="8px" />
+          </div>
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <div className="page-container shipments-page">
       
@@ -163,18 +196,19 @@ export default function ShipmentsPage() {
       {/* 3. List */}
       <div className="shipments-list">
         {loading ? (
-          <div className="loading-state"><div className="spinner"></div><p>Loading Shipments...</p></div>
+          // Render Skeletons instead of generic spinner
+          renderSkeletons()
         ) : shipments.length > 0 ? (
           shipments.map((shipment) => (
             <ShipmentCard 
               key={shipment.id} 
               data={shipment} 
-              onViewDetails={() => handleViewDetails(shipment.publicId)} // <--- View Details Action
-              onDelete={() => requestDelete(shipment.publicId)}           // <--- Trigger Modal Action
+              onViewDetails={() => handleViewDetails(shipment.publicId)} 
+              onDelete={() => requestDelete(shipment.publicId)}          
             />
           ))
         ) : (
-          <div className="empty-state">
+          <div className="empty-state fade-in">
             <p>No shipments found.</p>
             <button className="btn-clear" onClick={() => setFilterStatus('all')}>Clear Filters</button>
           </div>
@@ -182,8 +216,8 @@ export default function ShipmentsPage() {
       </div>
 
       {/* 4. Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination-footer">
+      {!loading && totalPages > 1 && (
+        <div className="pagination-footer fade-in">
           <div className="pagination-info">Page <strong>{page}</strong> of <strong>{totalPages}</strong></div>
           <div className="pagination-controls">
             <button 

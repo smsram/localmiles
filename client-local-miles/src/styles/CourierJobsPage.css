@@ -226,3 +226,36 @@
   .map-overlay-container { bottom: 16px; left: 16px; }
   .map-legend { display: none; }
 }
+
+/* ADD TO: src/styles/CourierJobsPage.css */
+
+/* Selected States */
+.job-card-recommended.selected {
+  border-color: #10B981; /* Green */
+  background: rgba(16, 185, 129, 0.05);
+  transform: scale(1.02);
+}
+
+.job-card-standard.selected {
+  border-color: #10B981;
+  background: rgba(16, 185, 129, 0.05);
+  transform: scale(1.02);
+}
+
+.job-card-recommended, .job-card-standard {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.selected-ring {
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 2px solid #10B981;
+  border-radius: 20px;
+  pointer-events: none;
+  animation: pulseRing 1.5s infinite;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.05); opacity: 0; }
+}

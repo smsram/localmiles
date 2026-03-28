@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { 
@@ -15,8 +15,8 @@ import '@/styles/Checkout.css';
 import VerifyMobileModal from '@/components/auth/VerifyMobileModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import ToastNotification from '@/components/ui/ToastNotification';
+import Skeleton from '@/components/ui/Skeleton'; // <-- IMPORT SKELETON
 
-// STRICT ENV URL - No localhost fallback
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // --- DYNAMIC MAP IMPORTS ---
@@ -92,7 +92,9 @@ export default function CheckoutPage() {
           setIsPhoneVerified(userData.data.isPhoneVerified);
         }
       } catch (err) { setError("Network error."); } 
-      finally { setLoading(false); }
+      finally { 
+        setTimeout(() => setLoading(false), 800); 
+      }
     };
     if (id) fetchData();
   }, [id, router]);
@@ -141,8 +143,6 @@ export default function CheckoutPage() {
       if (data.success) {
         setShowConfirmModal(false);
         setToast({ show: true, message: 'Payment successful! Searching for couriers...', type: 'success' });
-        
-        // Wait 1.5 seconds for the toast animation to finish before navigating to track
         setTimeout(() => {
           router.push(`/sender/shipments/${id}`); 
         }, 1500);
@@ -158,7 +158,45 @@ export default function CheckoutPage() {
     }
   };
 
-  if (loading) return <div className="checkout-loading-screen"><div className="spinner"></div><p>Loading...</p></div>;
+  // --- SKELETON RENDERER ---
+  const renderSkeletons = () => (
+    <div className="checkout-page-container">
+      <header className="checkout-header">
+        <div className="header-left">
+           <Skeleton width="40px" height="40px" circle={true} />
+           <div style={{ marginLeft: '12px' }}>
+              <Skeleton width="180px" height="24px" style={{ marginBottom: '8px' }} />
+              <Skeleton width="120px" height="14px" />
+           </div>
+        </div>
+      </header>
+      <div className="checkout-grid">
+        <div className="left-column">
+           <Skeleton width="100%" height="350px" borderRadius="16px" style={{ marginBottom: '24px' }} />
+           <div className="card" style={{ padding: '24px' }}>
+              <Skeleton width="150px" height="20px" style={{ marginBottom: '20px' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                 <Skeleton width="100%" height="60px" borderRadius="12px" />
+                 <Skeleton width="100%" height="60px" borderRadius="12px" />
+                 <Skeleton width="100%" height="60px" borderRadius="12px" />
+              </div>
+           </div>
+        </div>
+        <div className="right-column">
+           <div className="card" style={{ padding: '24px' }}>
+              <Skeleton width="60%" height="24px" style={{ marginBottom: '24px' }} />
+              <Skeleton width="100%" height="16px" style={{ marginBottom: '12px' }} />
+              <Skeleton width="100%" height="16px" style={{ marginBottom: '12px' }} />
+              <Skeleton width="100%" height="1px" style={{ margin: '20px 0' }} />
+              <Skeleton width="100%" height="32px" style={{ marginBottom: '24px' }} />
+              <Skeleton width="100%" height="50px" borderRadius="10px" />
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return renderSkeletons();
   if (!packageData) return null;
 
   const isWalletInsufficient = walletBalance < packageData.price;

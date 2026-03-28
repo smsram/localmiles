@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import LoadingSpinner from '@/components/ui/LoadingSpinner'; // <-- Import the spinner
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,26 +65,12 @@ export default function AuthGuard({ children }) {
     setAuthorized(false);
     
     // 3. Redirect to login
-    router.push('/auth/login'); 
+    router.push('/login'); // Assuming '/login' is the correct route
   };
 
   if (!authorized) {
-    return (
-      <div style={{ height: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-page, #f9f9f9)' }}>
-        <div className="ag-spinner"></div>
-        <style jsx>{`
-          .ag-spinner { 
-            width: 40px; 
-            height: 40px; 
-            border: 4px solid var(--border-light, #e5e7eb); 
-            border-top: 4px solid var(--brand-gold, #D4AF37); 
-            border-radius: 50%; 
-            animation: spin 1s linear infinite; 
-          }
-          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        `}</style>
-      </div>
-    );
+    // Replaced the hardcoded spinner with the reusable component
+    return <LoadingSpinner fullPage={true} />;
   }
 
   return <>{children}</>;

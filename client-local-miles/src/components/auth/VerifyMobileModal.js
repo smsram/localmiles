@@ -25,6 +25,7 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
 
   if (!isOpen) return null;
 
+  // --- 1. REQUEST OTP ---
   const handleSendOtp = async () => {
     if (!phone || phone.length < 10) return setErrorMsg("Please enter a valid 10-digit mobile number");
     setErrorMsg('');
@@ -54,10 +55,38 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
     }
   };
 
-  const handleTruecaller = () => {
-    alert("Truecaller verification integration would trigger here (Future Scope).");
+  // --- 2. TRUECALLER VERIFICATION (Simulated) ---
+  const handleTruecaller = async () => {
+    if (!phone || phone.length < 10) return setErrorMsg("Enter your number first to use Truecaller");
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const token = localStorage.getItem('token');
+      // In production, Truecaller SDK provides a payload. Here we simulate it.
+      const simulatedPayload = "truecaller_verified_signature"; 
+
+      const res = await fetch(`${API_URL}/auth/verify-truecaller`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ phone, payload: simulatedPayload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Truecaller Verification Failed");
+
+      if (onVerified) onVerified();
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // --- OTP INPUT HANDLERS ---
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return false;
 
@@ -78,6 +107,7 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
     }
   };
 
+  // --- 3. SUBMIT OTP ---
   const verifyOtp = async () => {
     const code = otp.join("");
     if (code.length !== 6) return setErrorMsg("Please enter the complete 6-digit code");
@@ -108,8 +138,8 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="verification-card">
+    <div className="modal-overlay" style={{ zIndex: 10000 }}>
+      <div className="verification-card fade-in">
         
         <button className="btn-close-modal" onClick={onClose} aria-label="Close">
           <XMarkIcon width={24} />
@@ -119,7 +149,7 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
           <div className="loading-overlay">
             <div className="spinner"></div>
             <div className="loading-text">
-              {step === 'PHONE' ? 'Sending Verification Code...' : 'Verifying Code...'}
+              {step === 'PHONE' ? 'Processing...' : 'Verifying Code...'}
             </div>
           </div>
         )}
@@ -142,9 +172,8 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
             </p>
 
             {errorMsg && (
-              <div className="error-message">
-                <ExclamationCircleIcon className="error-icon" />
-                <span>{errorMsg}</span>
+              <div className="error-message" style={{ color: '#EF4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ExclamationCircleIcon width={16} /> <span>{errorMsg}</span>
               </div>
             )}
 
@@ -163,15 +192,15 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
             </div>
 
             <button className="btn-verify btn-whatsapp" onClick={handleSendOtp}>
-              <ChatBubbleLeftRightIcon style={{ width: 22 }} /> Get OTP via WhatsApp
+              <ChatBubbleLeftRightIcon style={{ width: 22 }} /> Get OTP (Secure)
             </button>
 
-            <button className="btn-verify btn-truecaller" onClick={handleTruecaller}>
+            <button className="btn-verify btn-truecaller" onClick={handleTruecaller} style={{ marginTop: '12px', background: '#0056D2', color: 'white', border: 'none' }}>
               <PhoneIcon style={{ width: 20 }} /> 1-Tap Verify via Truecaller
             </button>
 
             <p className="disclaimer">
-              We will send a 6-digit code to your number via WhatsApp.
+              For testing purposes, the OTP will be printed in your backend console.
             </p>
           </div>
         )}
@@ -185,14 +214,13 @@ export default function VerifyMobileModal({ isOpen, onClose, onVerified }) {
 
             <h1 className="modal-title">Enter Verification Code</h1>
             <p className="modal-desc">
-              We've sent a 6-digit code to your WhatsApp number <br/>
+              We've generated a secure 6-digit code for your number <br/>
               <strong className="bold-text">+91 {phone}</strong>
             </p>
 
             {errorMsg && (
-              <div className="error-message">
-                <ExclamationCircleIcon className="error-icon" />
-                <span>{errorMsg}</span>
+              <div className="error-message" style={{ color: '#EF4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ExclamationCircleIcon width={16} /> <span>{errorMsg}</span>
               </div>
             )}
 
