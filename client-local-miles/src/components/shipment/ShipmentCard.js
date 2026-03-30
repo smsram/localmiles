@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   DevicePhoneMobileIcon, CubeIcon, DocumentTextIcon,
-  PencilSquareIcon, TrashIcon, PlayCircleIcon
+  PencilSquareIcon, TrashIcon, PlayCircleIcon, MapPinIcon
 } from '@heroicons/react/24/solid';
 import ResponsiveActionMenu from '@/components/ui/ResponsiveActionMenu';
 import '@/styles/ShipmentCard.css';
@@ -36,8 +36,7 @@ const formatDate = (dateStr) => {
 const truncateLoc = (loc) => loc?.split(',')[0] || 'Location';
 
 // --- MAIN COMPONENT ---
-// Added onViewDetails and onDelete props
-export default function ShipmentCard({ data, onViewDetails, onDelete }) { 
+export default function ShipmentCard({ data, onViewDetails, onTrackLive, onDelete }) { 
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
 
@@ -52,30 +51,35 @@ export default function ShipmentCard({ data, onViewDetails, onDelete }) {
   const statusClass = getStatusClass(status);
 
   // --- ACTIONS LOGIC ---
+  
+  // Default primary action for active shipments
   let primaryAction = { 
     label: 'Track', 
-    onClick: () => router.push(`/sender/shipments/${publicId}/track`) // Example track route
+    icon: MapPinIcon,
+    // Use the onTrackLive prop passed from the parent if available, otherwise fallback to router push
+    onClick: onTrackLive ? onTrackLive : () => router.push(`/track/${publicId}`)
   };
   
+  // If the package is a DRAFT, the primary goal is to complete the payment
   if (status === 'DRAFT') {
     primaryAction = { 
       label: 'Pay Now', 
       icon: PlayCircleIcon,
-      style: 'gold', // Ensures it uses the gold style in ResponsiveActionMenu
+      style: 'gold', 
       onClick: () => router.push(`/sender/send/checkout/${publicId}`) 
     };
   }
 
-  // Base Menu Items
+  // Base Menu Items available for all packages
   const menuItems = [
     { 
       label: "View Details", 
       icon: DocumentTextIcon, 
-      onClick: onViewDetails // Connects to the prop passed from ShipmentsPage
+      onClick: onViewDetails 
     },
   ];
 
-  // Draft-specific Menu Items
+  // Specific Menu Items for Drafts
   if (status === 'DRAFT') {
     menuItems.unshift({ 
       label: "Edit Draft", 
@@ -85,8 +89,8 @@ export default function ShipmentCard({ data, onViewDetails, onDelete }) {
     menuItems.push({ 
       label: "Delete Draft", 
       icon: TrashIcon, 
-      color: 'var(--error-red, #EF4444)', // Uses theme variable or fallback
-      onClick: onDelete // Triggers the Confirmation Modal on the Parent Page
+      color: 'var(--error-red, #EF4444)', 
+      onClick: onDelete 
     });
   }
 
@@ -139,13 +143,11 @@ export default function ShipmentCard({ data, onViewDetails, onDelete }) {
                 primary={primaryAction}
                 secondary={{ 
                   label: "Menu", 
-                  // If you want the "Menu" button to act differently, set it here. 
-                  // Otherwise, ResponsiveActionMenu uses its own internal state to open the dropdown.
                 }}
                 menuItems={menuItems}
                 title="Options"
-                // Optional: Pass state up if your ActionMenu supports it to change z-index
-                // onOpenChange={setIsActive} 
+                // This ensures the dropdown doesn't get clipped by other cards below it
+                onOpenChange={setIsActive} 
             />
           </div>
       </div>

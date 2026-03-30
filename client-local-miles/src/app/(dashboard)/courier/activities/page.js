@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { 
   TruckIcon, MapPinIcon, ClockIcon, QrCodeIcon, 
@@ -20,21 +21,54 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 // Dynamically import the Reusable Map safely
 const CourierMap = dynamic(() => import('@/components/ui/CourierMap'), { 
   ssr: false, 
-  loading: () => <Skeleton width="100%" height="100%" borderRadius="0" /> 
+  loading: () => <Skeleton width="100%" height="100%" borderRadius="24px" /> 
 });
 
+// Helper: Haversine Distance Calculator (km)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; 
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 export default function CourierActivitiesPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('active');
   const [historyFilter, setHistoryFilter] = useState('all');
+  const [userLocation, setUserLocation] = useState(null);
   
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState({ activeJobs: [], scheduledJobs: [], historyJobs: [] });
   const [activeRoutePath, setActiveRoutePath] = useState([]);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
-  // 1. Fetch Backend Data
-  const fetchActivities = async () => {
+  // 1. Live Location Tracking
+  useEffect(() => {
+    const ANDHRA_PRADESH = { lat: 15.9129, lng: 79.7400 };
+
+    if (navigator.geolocation) {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        (err) => {
+          console.warn("Location watch failed", err);
+          if (!userLocation) setUserLocation(ANDHRA_PRADESH);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    } else {
+      setUserLocation(ANDHRA_PRADESH);
+    }
+  }, []);
+
+  // 2. Fetch Backend Data
+  const fetchActivities = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -52,14 +86,14 @@ export default function CourierActivitiesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivities();
-  }, []);
+  }, [fetchActivities]);
 
-  // 2. Compute Map Path for Active Job
-  const activeJob = activities.activeJobs[0]; // Assuming taking the first active job
+  // 3. Compute Map Path for the first Active Job
+  const activeJob = activities.activeJobs[0];
   
   useEffect(() => {
     const fetchPath = async () => {
@@ -71,7 +105,7 @@ export default function CourierActivitiesPage() {
           if (data.routes && data.routes.length > 0) {
             setActiveRoutePath(data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]));
           }
-        } catch (e) { console.error("OSRM Error"); }
+        } catch (e) { console.error("OSRM Error", e); }
       }
     };
     fetchPath();
@@ -87,8 +121,18 @@ export default function CourierActivitiesPage() {
         <TruckIcon style={{ width: 48, margin: '0 auto 16px', color: 'var(--text-muted)', opacity: 0.5 }} />
         <h3 style={{ color: 'var(--text-main)', marginBottom: '8px' }}>No Active Deliveries</h3>
         <p style={{ color: 'var(--text-muted)' }}>You don't have any packages currently in transit.</p>
+        <button className="btn-verify" style={{marginTop: '16px', border: '1.5px solid var(--brand-gold)', background: 'transparent', color: 'var(--brand-gold)'}} onClick={() => router.push('/courier/jobs')}>Find Jobs</button>
       </div>
     );
+
+    const isHeadingToPickup = activeJob.status === 'ASSIGNED';
+    const targetLat = isHeadingToPickup ? activeJob.pickupLat : activeJob.dropLat;
+    const targetLng = isHeadingToPickup ? activeJob.pickupLng : activeJob.dropLng;
+
+    let gapDistance = null;
+    if (userLocation && targetLat && targetLng) {
+      gapDistance = calculateDistance(userLocation.lat, userLocation.lng, targetLat, targetLng).toFixed(1);
+    }
 
     return (
       <div className="fade-in">
@@ -96,25 +140,30 @@ export default function CourierActivitiesPage() {
           <div className="job-details-panel">
             <div>
               <div className="job-status-row">
-                <span className="live-badge">{activeJob.status.replace('_', ' ')}</span>
-                <span className="pickup-time">{activeJob.distanceKm} km Trip</span>
+                <span className="live-badge" style={{ background: '#10B981', color: '#fff' }}>
+                   LIVE: {activeJob.status.replace('_', ' ')}
+                </span>
+                <span className="pickup-time">{activeJob.distanceKm} km Total Trip</span>
               </div>
 
               <div className="timeline-container">
                 <div className="timeline-line"></div>
+                
+                {/* 1. CURRENT COURIER LOCATION */}
                 <div className="timeline-item">
                   <div className="timeline-icon-circle active">
                     <TruckIcon style={{ width: 20 }} />
                   </div>
                   <div className="timeline-content">
-                    <h3 className="text-white">You</h3>
-                    <p>Moving towards destination</p>
+                    <h3 className="text-white">Your Location</h3>
+                    <p>{gapDistance ? `${gapDistance} km gap to ${isHeadingToPickup ? 'Pickup' : 'Dropoff'}` : 'Locating GPS...'}</p>
                   </div>
                 </div>
 
-                <div className="timeline-item">
-                  <div className="timeline-icon-circle">
-                    <UserIcon style={{ width: 20, color: '#9CA3AF' }} />
+                {/* 2. PICKUP */}
+                <div className="timeline-item" style={{ opacity: isHeadingToPickup ? 1 : 0.6 }}>
+                  <div className="timeline-icon-circle" style={{ borderColor: isHeadingToPickup ? 'var(--brand-gold)' : '#374151' }}>
+                    <UserIcon style={{ width: 20, color: isHeadingToPickup ? 'var(--brand-gold)' : '#9CA3AF' }} />
                   </div>
                   <div className="timeline-content">
                     <h3 className="text-white">Pickup: {activeJob.pickupAddress.split(',')[0]}</h3>
@@ -122,23 +171,24 @@ export default function CourierActivitiesPage() {
                   </div>
                 </div>
 
-                <div className="timeline-item" style={{ opacity: 0.5 }}>
-                  <div className="timeline-icon-circle" style={{ borderStyle: 'dashed' }}>
-                    <MapPinIcon style={{ width: 20 }} />
+                {/* 3. DROPOFF */}
+                <div className="timeline-item" style={{ opacity: isHeadingToPickup ? 0.4 : 1 }}>
+                  <div className="timeline-icon-circle" style={{ borderStyle: 'dashed', borderColor: !isHeadingToPickup ? '#EF4444' : '#374151' }}>
+                    <MapPinIcon style={{ width: 20, color: !isHeadingToPickup ? '#EF4444' : '#9CA3AF' }} />
                   </div>
                   <div className="timeline-content">
                     <h3 className="text-white">Drop: {activeJob.dropAddress.split(',')[0]}</h3>
-                    <p>Standard Delivery</p>
+                    <p>{isHeadingToPickup ? 'Next Stop' : 'Heading here now'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="card-actions">
-              <button className="btn-navigate">
+              <button className="btn-navigate" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${targetLat},${targetLng}&travelmode=driving`, '_blank')}>
                 <PaperAirplaneIcon style={{ width: 20 }} /> Navigate
               </button>
-              <button className="btn-verify">
+              <button className="btn-verify" onClick={() => router.push(`/courier/jobs/${activeJob.publicId}`)}>
                 <QrCodeIcon style={{ width: 20 }} /> View Details
               </button>
             </div>
@@ -147,15 +197,23 @@ export default function CourierActivitiesPage() {
           <div className="job-map-panel">
             <CourierMap 
               theme={theme}
-              pickupLat={activeJob.pickupLat} pickupLng={activeJob.pickupLng}
-              dropoffLat={activeJob.dropLat} dropoffLng={activeJob.dropLng}
+              userLocation={userLocation}
+              jobs={[activeJob]}
               mapPath={activeRoutePath}
               zoomControl={false}
               scrollWheelZoom={false}
             />
             <div className="map-overlay-info">
-              <div className="info-block"><MapPinIcon style={{width: 20, color: '#D4AF37'}} /> {activeJob.distanceKm} km</div>
-              <div className="info-block"><ClockIcon style={{width: 20, color: '#D4AF37'}} /> Active</div>
+              {gapDistance && (
+                <div className="info-block">
+                  <ClockIcon style={{width: 18, color: '#D4AF37'}} /> 
+                  <span>{gapDistance} km left</span>
+                </div>
+              )}
+              <div className="info-block">
+                <MapPinIcon style={{width: 18, color: '#D4AF37'}} /> 
+                <span>{activeJob.urgency}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -165,8 +223,7 @@ export default function CourierActivitiesPage() {
 
   const renderScheduledTab = () => {
     if (loading) return <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>{[1,2].map(i => <Skeleton key={i} width="100%" height="150px" borderRadius="16px" />)}</div>;
-
-    if (activities.scheduledJobs.length === 0) return <p style={{ color: 'var(--text-muted)' }}>No upcoming scheduled jobs.</p>;
+    if (activities.scheduledJobs.length === 0) return <p style={{ color: 'var(--text-muted)', padding: '20px' }}>No upcoming scheduled jobs.</p>;
 
     return (
       <div className="fade-in">
@@ -174,27 +231,22 @@ export default function CourierActivitiesPage() {
           <CalendarIcon style={{ width: 24, color: '#D4AF37' }} />
           <h2 className="section-title">Upcoming Deliveries</h2>
         </div>
-
-        {activities.scheduledJobs.map((job) => {
-          // Format data for ActivityCard
-          const formattedData = {
-            id: job.publicId,
-            dateGroup: job.scheduledDate ? new Date(job.scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Pending Pickup',
-            timeSlot: job.scheduledDate ? new Date(job.scheduledDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'ASAP',
-            badge: job.urgency,
-            pickup: job.pickupAddress.split(',')[0],
-            drop: job.dropAddress.split(',')[0],
-            cargo: `${job.category} • ${job.weight}kg`,
-            earnings: job.driverFee.toFixed(2)
-          };
-
-          return (
-            <div key={job.id}>
-              <div className="date-header">{formattedData.dateGroup}</div>
-              <ActivityCard type="scheduled" data={formattedData} />
+        {activities.scheduledJobs.map((job) => (
+          <div key={job.id} onClick={() => router.push(`/courier/jobs/${job.publicId}`)} style={{cursor: 'pointer'}}>
+            <div className="date-header">
+              {job.scheduledDate ? new Date(job.scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Pending'}
             </div>
-          );
-        })}
+            <ActivityCard type="scheduled" data={{
+              id: job.publicId,
+              timeSlot: job.scheduledDate ? new Date(job.scheduledDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'ASAP',
+              badge: job.urgency,
+              pickup: job.pickupAddress.split(',')[0],
+              drop: job.dropAddress.split(',')[0],
+              cargo: `${job.category} • ${job.weight}kg`,
+              earnings: job.driverFee.toFixed(2)
+            }} />
+          </div>
+        ))}
       </div>
     );
   };
@@ -202,48 +254,30 @@ export default function CourierActivitiesPage() {
   const renderHistoryTab = () => {
     if (loading) return <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>{[1,2,3].map(i => <Skeleton key={i} width="100%" height="80px" borderRadius="16px" />)}</div>;
 
-    // Filter Logic
     const filteredHistory = activities.historyJobs.filter(job => {
       if (historyFilter === 'completed') return job.status === 'DELIVERED';
       if (historyFilter === 'cancelled') return job.status === 'CANCELLED';
-      if (historyFilter === 'last 7 days') {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        return new Date(job.updatedAt) >= sevenDaysAgo;
-      }
-      return true; // 'all'
+      return true;
     });
 
     return (
       <div className="fade-in">
         <div className="history-filters">
-          {['All', 'Last 7 Days', 'Completed', 'Cancelled'].map(f => (
-            <button 
-              key={f} 
-              className={`filter-chip ${historyFilter === f.toLowerCase() ? 'active' : ''}`}
-              onClick={() => setHistoryFilter(f.toLowerCase())}
-            >
-              {f}
-            </button>
+          {['All', 'Completed', 'Cancelled'].map(f => (
+            <button key={f} className={`filter-chip ${historyFilter === f.toLowerCase() ? 'active' : ''}`} onClick={() => setHistoryFilter(f.toLowerCase())}>{f}</button>
           ))}
         </div>
-        
-        {filteredHistory.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No history found for this filter.</p>
-        ) : (
+        {filteredHistory.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No history found.</p> : (
           <div className="history-list">
-            {filteredHistory.map((trip) => {
-              const isSuccess = trip.status === 'DELIVERED';
-              const formattedData = {
+            {filteredHistory.map((trip) => (
+              <ActivityCard key={trip.id} type="history" data={{
                 id: trip.publicId,
-                status: isSuccess ? 'success' : 'failed',
+                status: trip.status === 'DELIVERED' ? 'success' : 'failed',
                 route: `${trip.pickupAddress.split(',')[0]} ➔ ${trip.dropAddress.split(',')[0]}`,
                 date: new Date(trip.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
                 amount: `₹ ${trip.driverFee.toFixed(2)}`
-              };
-              
-              return <ActivityCard key={trip.id} type="history" data={formattedData} />;
-            })}
+              }} onClick={() => router.push(`/courier/jobs/${trip.publicId}`)} />
+            ))}
           </div>
         )}
       </div>
@@ -261,11 +295,7 @@ export default function CourierActivitiesPage() {
 
       <div className="activities-tabs">
         {['active', 'scheduled', 'history'].map((tab) => (
-          <button 
-            key={tab}
-            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
+          <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
             {tab.charAt(0).toUpperCase() + tab.slice(1)} 
             {tab === 'active' && activities.activeJobs.length > 0 && <span className="tab-badge">{activities.activeJobs.length}</span>}
           </button>

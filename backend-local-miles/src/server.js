@@ -7,36 +7,19 @@ process.env.TZ = "Asia/Kolkata";
 require('dotenv').config();
 const http = require('http');
 const app = require('./app');
-const { Server } = require('socket.io');
 const prisma = require('./utils/prisma');
+
+// 1. Import our newly created Socket Service
+const { initSocket } = require('./services/socket.service');
 
 const PORT = process.env.PORT || 5000;
 
-// 1. Create HTTP Server
+// 2. Create HTTP Server
 const server = http.createServer(app);
 
-// 2. Initialize Socket.io (Real-time Layer)
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
-
-// 3. Global Socket Instance
-global.io = io;
-
-io.on('connection', (socket) => {
-  // console.log(`⚡ New client connected: ${socket.id}`);
-  
-  socket.on('join_room', (room) => {
-    socket.join(room);
-  });
-
-  socket.on('disconnect', () => {
-    // console.log('Client disconnected');
-  });
-});
+// 3. Initialize Socket.io (Real-time Layer)
+// This attaches the tracking rooms and live location listeners to our server
+initSocket(server);
 
 // 4. Start Server Logic
 async function startServer() {

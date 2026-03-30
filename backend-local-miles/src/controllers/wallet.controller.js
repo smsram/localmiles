@@ -126,74 +126,112 @@ exports.withdrawWallet = async (req, res) => {
 exports.getCourierEarnings = async (req, res) => {
   try {
     const userId = req.user.id;
+    const weeksAgo = parseInt(req.query.weeksAgo) || 0; // Extract from query
+
     const user = await prisma.user.findUnique({ 
       where: { id: userId }, 
       select: { walletBalance: true } 
     });
 
-    // Date Boundaries
+    // --- 1. "TODAY" BOUNDARIES (Always current actual day for the top cards) ---
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - (startOfWeek.getDay() || 7) + 1); 
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    // 1. Today's Trips (Completed Deliveries)
     const todayTrips = await prisma.package.count({
-      where: { 
-        courierId: userId, 
-        status: 'DELIVERED', 
-        updatedAt: { gte: startOfToday } 
-      }
+      where: { courierId: userId, status: 'DELIVERED', updatedAt: { gte: startOfToday } }
     });
 
-    // 2. Today's Earnings (Sum of CREDIT transactions today tagged as COURIER)
     const todayTxns = await prisma.transaction.findMany({
-      where: { 
-        userId, 
-        type: 'CREDIT', 
-        status: 'SUCCESS', 
-        appMode: 'COURIER', // Excludes Sender Top-ups
-        createdAt: { gte: startOfToday } 
-      }
+      where: { userId, type: 'CREDIT', status: 'SUCCESS', appMode: 'COURIER', createdAt: { gte: startOfToday } }
     });
     const todayEarnings = todayTxns.reduce((sum, t) => sum + t.amount, 0);
 
-    // 3. Weekly Chart Data (Mon - Sun) tagged as COURIER
+    const todayShifts = await prisma.courierShift.findMany({
+      where: { courierId: userId, startTime: { gte: startOfToday } }
+    });
+    
+    let todayOnlineHours = 0;
+    todayShifts.forEach(s => {
+      const end = s.endTime || s.lastHeartbeat || new Date();
+      todayOnlineHours += (new Date(end) - new Date(s.startTime)) / (1000 * 60 * 60);
+    });
+
+    // --- 2. WEEKLY GRAPH BOUNDARIES (Calculated based on weeksAgo) ---
+    const startOfWeek = new Date();
+    const currentDay = startOfWeek.getDay();
+    // Go to previous Monday, then subtract weeksAgo * 7 days
+    const diff = startOfWeek.getDate() - currentDay + (currentDay === 0 ? -6 : 1) - (weeksAgo * 7);
+    startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999); // End of Sunday
+
+    // Fetch transactions strictly for the targeted week
     const weekTxns = await prisma.transaction.findMany({
       where: { 
-        userId, 
-        type: 'CREDIT', 
-        status: 'SUCCESS', 
-        appMode: 'COURIER', // Excludes Sender Top-ups
-        createdAt: { gte: startOfWeek } 
+        userId, type: 'CREDIT', status: 'SUCCESS', appMode: 'COURIER', 
+        createdAt: { gte: startOfWeek, lte: endOfWeek } 
       }
     });
 
+    // Fetch shifts strictly for the targeted week
+    const weekShifts = await prisma.courierShift.findMany({
+      where: {
+        courierId: userId,
+        startTime: { gte: startOfWeek, lte: endOfWeek }
+      }
+    });
+
+    // --- 3. BUILD WEEKLY ARRAY ---
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const weeklyData = days.map(day => ({ day, val: 0, active: false }));
+    const weeklyData = days.map(dayName => ({ day: dayName, earnings: 0, hours: 0, active: false }));
 
     weekTxns.forEach(t => {
       const d = new Date(t.createdAt);
-      let dayIndex = d.getDay() - 1; // 0 = Mon, 6 = Sun
+      let dayIndex = d.getDay() - 1; 
       if (dayIndex === -1) dayIndex = 6; 
-      weeklyData[dayIndex].val += t.amount;
+      if (weeklyData[dayIndex]) weeklyData[dayIndex].earnings += t.amount;
     });
 
-    let todayIndex = new Date().getDay() - 1;
-    if (todayIndex === -1) todayIndex = 6;
-    weeklyData[todayIndex].active = true;
+    weekShifts.forEach(s => {
+      const d = new Date(s.startTime);
+      let dayIndex = d.getDay() - 1;
+      if (dayIndex === -1) dayIndex = 6;
 
-    // 4. Recent Courier Transactions
-    const recentTransactions = await prisma.transaction.findMany({
-      where: { 
-        userId,
-        appMode: 'COURIER' // Only show delivery payouts/withdrawals
-      },
+      const end = s.endTime || s.lastHeartbeat || new Date();
+      const durationHrs = (new Date(end) - new Date(s.startTime)) / (1000 * 60 * 60);
+      if (weeklyData[dayIndex]) weeklyData[dayIndex].hours += durationHrs;
+    });
+
+    // Only highlight "Today" if we are looking at the current week (weeksAgo === 0)
+    if (weeksAgo === 0) {
+      let todayIndex = new Date().getDay() - 1;
+      if (todayIndex === -1) todayIndex = 6;
+      weeklyData[todayIndex].active = true;
+    }
+
+    // --- 4. RECENT ACTIVITY (Merge Transactions + Packages) ---
+    // A. Fetch last 5 courier transactions
+    const recentTxnsRaw = await prisma.transaction.findMany({
+      where: { userId, appMode: 'COURIER' },
       orderBy: { createdAt: 'desc' },
       take: 5
     });
+
+    // B. Fetch last 5 updated packages for this courier
+    const recentPkgsRaw = await prisma.package.findMany({
+      where: { courierId: userId },
+      orderBy: { updatedAt: 'desc' },
+      take: 5
+    });
+
+    // C. Merge them into a standard array, sort by date, and take the top 5 overall
+    const combinedActivity = [
+      ...recentTxnsRaw.map(t => ({ type: 'TXN', date: t.createdAt, data: t })),
+      ...recentPkgsRaw.map(p => ({ type: 'PKG', date: p.updatedAt, data: p }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
     res.status(200).json({
       success: true,
@@ -201,9 +239,13 @@ exports.getCourierEarnings = async (req, res) => {
         balance: user.walletBalance,
         todayEarnings,
         todayTrips,
-        onlineHours: 5.5, 
-        weeklyData,
-        recentTransactions
+        onlineHours: parseFloat(todayOnlineHours.toFixed(2)), 
+        weeklyData: weeklyData.map(d => ({
+          ...d,
+          earnings: parseFloat(d.earnings.toFixed(2)),
+          hours: parseFloat(d.hours.toFixed(2))
+        })),
+        combinedActivity // Contains both Wallet Credits & Package Updates
       }
     });
   } catch (error) {

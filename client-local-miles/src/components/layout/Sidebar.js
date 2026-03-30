@@ -45,6 +45,17 @@ export default function Sidebar() {
   // 1. Determine Mode based on URL
   const isCourierPath = pathname?.startsWith('/courier');
 
+  // --- DYNAMIC PAGE TITLE (FIXED) ---
+  // Listens to `pathname` so it enforces the title on every single page navigation, 
+  // preventing Next.js from overwriting it with defaults.
+  useEffect(() => {
+    if (pathname?.startsWith('/courier')) {
+      document.title = 'Local Miles | Courier';
+    } else if (pathname?.startsWith('/sender')) {
+      document.title = 'Local Miles | Sender';
+    }
+  }, [pathname]);
+
   // 2. Load User & Handle Security Redirects
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -124,6 +135,8 @@ export default function Sidebar() {
       router.push('/login');
     }, 1000);
   };
+
+  const profileImageUrl = user?.profilePicture || user?.avatar || user?.profileImage;
 
   return (
     <>
@@ -215,8 +228,19 @@ export default function Sidebar() {
 
           {/* User Profile Card */}
           <div className="user-card">
-            <div className="avatar">
-                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+            
+            <div className="avatar" style={{ overflow: 'hidden', padding: 0 }}>
+              {profileImageUrl ? (
+                <img 
+                  src={profileImageUrl} 
+                  alt="Profile" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              ) : (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                </span>
+              )}
             </div>
             
             <div className="user-info">

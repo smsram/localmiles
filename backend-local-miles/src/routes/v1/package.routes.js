@@ -12,41 +12,57 @@ const {
   deletePackage,
   cancelOrder,
   getAvailableJobs,
-  getCourierActivities
+  getCourierActivities,
+  acceptPackage,
+  updatePackageStatus,
+  resendPickupOtp,
+  verifyPickup,
+  resendDeliveryOtp,
+  verifyDelivery,
+  getPublicTrackingInfo,
+  submitReview // Added the review function
 } = require('../../controllers/package.controller');
 
 // ==========================================
-// 1. SPECIFIC ROUTES (MUST BE FIRST)
+// 1. STATIC & PUBLIC ROUTES (MUST BE FIRST!)
 // ==========================================
+// Public tracking (No Auth)
+router.get('/public-track/:id', getPublicTrackingInfo);
 
-// GET /api/v1/packages/my-shipments
-// This MUST come before '/:id' or Express will think "my-shipments" is an ID
+// Protected Static Routes
+router.get('/available', protect, getAvailableJobs);
+router.get('/courier/activities', protect, getCourierActivities);
 router.get('/my-shipments', protect, getMyShipments); 
-
-// POST /api/v1/packages/draft
 router.post('/draft', protect, upload.array('images', 10), createDraftPackage);
+
 
 // ==========================================
 // 2. DYNAMIC ROUTES (WITH :id)
 // ==========================================
 
-// PUT /api/v1/packages/:id (Update)
+// OTP Verification & Resending
+router.post('/:id/resend-pickup-otp', protect, resendPickupOtp);
+router.post('/:id/verify-pickup', protect, verifyPickup);
+router.post('/:id/resend-delivery-otp', protect, resendDeliveryOtp);
+router.post('/:id/verify-delivery', protect, verifyDelivery);
+
+// NEW: Courier Review Route
+router.post('/:id/review', protect, submitReview);
+
+// Order Management
 router.put('/:id', protect, upload.array('images', 10), updateDraftPackage);
-
-// POST /api/v1/packages/:id/pay (Pay)
 router.post('/:id/pay', protect, processPayment);
-
-// GET /api/v1/packages/:id (Read)
-// This catches anything else like "LM26-XXX", so it must be last
-router.get('/:id', protect, getPackageByPublicId);
-
-// DELETE /api/v1/packages/:id (Delete Draft)
 router.delete('/:id', protect, deletePackage);
-
 router.post('/:id/cancel', protect, cancelOrder);
 
-router.get('/available', protect, getAvailableJobs);
+// Courier Specific Actions
+router.post('/:id/accept', protect, acceptPackage);
+router.put('/:id/status', protect, updatePackageStatus);
 
-router.get('/courier/activities', protect, getCourierActivities);
+// ==========================================
+// 3. THE CATCH-ALL (ID LOOKUP)
+// ==========================================
+// This must stay at the VERY bottom because it matches any /:id pattern
+router.get('/:id', protect, getPackageByPublicId);
 
 module.exports = router;

@@ -45,6 +45,10 @@ model User {
   reviewsGiven         CourierReview[] @relation("ReviewSender")
   reviewsReceived      CourierReview[] @relation("ReviewCourier")
 
+  courierShifts CourierShift[]
+
+  notifications Notification[]
+
   @@map("users")
 }
 
@@ -112,6 +116,9 @@ model Package {
   platformFee     Float           @default(0.0)
   taxAmount       Float           @default(0.0)
   taxRateApplied  Int             @default(0)
+  lastLiveLat       Float?
+  lastLiveLng       Float?
+  lastLiveUpdatedAt DateTime?
   images          PackageImage[]
   courier         User?           @relation("CourierJobs", fields: [courierId], references: [id])
   sender          User            @relation("SenderPackages", fields: [senderId], references: [id])
@@ -273,6 +280,32 @@ model CourierReview {
   sender      User     @relation("ReviewSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("courier_reviews")
+}
+
+model CourierShift {
+  id            String   @id @default(uuid())
+  courierId     String
+  startTime     DateTime @default(now())
+  endTime       DateTime?
+  lastHeartbeat DateTime @default(now())
+  
+  courier       User     @relation(fields: [courierId], references: [id], onDelete: Cascade)
+  @@map("courier_shifts")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String?  // Nullable. If null, it's a broadcast based on targetRole
+  title       String
+  message     String
+  type        String   @default("INFO") // e.g., INFO, ALERT, EARNING, SYSTEM
+  targetRole  String   @default("BOTH") // 'SENDER', 'COURIER', or 'BOTH'
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
 enum UserRole {

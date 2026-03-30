@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "prisma": "^6.2.1", 
     "@prisma/client": "^6.2.1",
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
@@ -30,7 +29,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^7.0.12",
-    "socket.io": "^4.8.1",
+    "prisma": "^6.2.1",
+    "socket.io": "^4.8.3",
     "uuid": "^13.0.0",
     "winston": "^3.17.0"
   },

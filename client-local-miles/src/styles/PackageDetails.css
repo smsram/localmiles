@@ -253,3 +253,93 @@
   color: var(--text-muted);
   border: 1px solid var(--border-light);
 }
+
+
+
+
+/* --- PRIVACY & CONTACTS --- */
+.pd-privacy-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #D97706;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.pd-contact-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pd-contact-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.pd-contact-link.active-link {
+  background: var(--bg-page);
+  color: var(--brand-gold);
+  border: 1px solid var(--border-light);
+}
+
+.pd-contact-link.active-link:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--brand-gold);
+  transform: translateX(4px);
+}
+
+.pd-contact-link.disabled-link {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-light);
+  cursor: not-allowed;
+}
+
+/* --- STATIC MAP PREVIEW --- */
+.pd-static-map-preview {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  margin-bottom: 24px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.pd-static-map-preview:hover {
+  border-color: var(--brand-gold);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+}
+
+.pd-map-placeholder-bg {
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="%23e5e7eb" stroke-width="2"/></svg>');
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}

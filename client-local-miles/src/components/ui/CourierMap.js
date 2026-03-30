@@ -1,172 +1,100 @@
 'use client';
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// --- GLOBAL LEAFLET ICON FIX ---
-// This ensures standard Google/Leaflet icons don't break in Next.js
+// Fix for default Leaflet icon paths in Next.js
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// --- CUSTOM MARKER GENERATOR ---
-// Used for "Find Jobs" to show colored dots instead of standard pins
-const createCustomIcon = (type, isSelected) => {
-  let color = '#9CA3AF'; // Standard (Grey)
-  if (type === 'user') color = '#3B82F6'; // User Location (Blue)
-  if (type === 'recommended') color = '#D4AF37'; // Recommended (Gold)
-  if (isSelected) color = '#10B981'; // Selected (Green)
+const userIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
-  const size = type === 'user' ? 16 : (isSelected ? 24 : 20);
-  const zIndex = isSelected ? 1000 : (type === 'recommended' ? 500 : 1);
+const jobIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
-  return L.divIcon({
-    className: 'custom-job-marker',
-    html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: ${zIndex}; transition: all 0.2s;"></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2]
-  });
-};
-
-
-// --- MAP CONTROL COMPONENTS ---
-
-// 1. Bounds & Center Updater (For routing & panning)
-const MapUpdater = ({ bounds, center, zoom }) => {
+function MapUpdater({ center }) {
   const map = useMap();
   useEffect(() => {
-    if (bounds && bounds.length > 0) {
-      try { 
-        map.fitBounds(bounds, { padding: [50, 50], animate: true }); 
-      } catch(e) { console.warn("Map bounds error", e); }
-    } else if (center) {
-      map.flyTo(center, zoom || 13, { animate: true, duration: 1.5 });
+    if (center) {
+      map.flyTo(center, 13, { animate: true, duration: 1.5 });
     }
-  }, [map, bounds, center, zoom]);
+  }, [center, map]);
   return null;
-};
+}
 
-// 2. Click Listener (For picking locations)
-const MapClickHandler = ({ onMapClick }) => {
-  useMapEvents({
-    click: (e) => {
-      if (onMapClick) onMapClick(e.latlng);
-    },
-  });
-  return null;
-};
-
-// --- MAIN EXPORT COMPONENT ---
-export default function CourierMap({ 
-  theme, 
-  
-  // Single/Route Location Props
-  pickupLat, pickupLng, 
-  dropoffLat, dropoffLng, 
-  
-  // "Find Jobs" Props
-  jobs = [], // Array of job objects {id, pickupLat, pickupLng, isRecommended}
-  userLocation = null, // {lat, lng}
-  selectedJobId = null,
-  
-  // Shared Props
-  mapPath = [], 
-  onMapClick,
-  onMarkerClick,
-  zoomControl = false,
-  scrollWheelZoom = true,
-}) {
-  
-  // Determine Base Center
-  const defaultCenter = [19.0760, 72.8777]; // Mumbai Fallback
-  let initialCenter = defaultCenter;
-  let currentZoom = 12;
-
-  // Logic to determine where the map should look right now
-  if (userLocation && jobs.length > 0) {
-    // If in "Jobs" mode with a user location
-    initialCenter = [userLocation.lat, userLocation.lng];
-  } else if (pickupLat) {
-    // If in "Route" mode with a pickup selected
-    initialCenter = [pickupLat, pickupLng];
-    currentZoom = 14;
-  }
-
-  // If a specific job is clicked (in "Find Jobs" mode), pan to it
-  const selectedJob = jobs.find(j => j.id === selectedJobId);
-  const activeCenter = selectedJob ? [selectedJob.pickupLat, selectedJob.pickupLng] : initialCenter;
-  const activeZoom = selectedJob ? 15 : currentZoom;
-
-  const tileUrl = theme === 'dark' 
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
-    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+export default function CourierMap({ jobs = [], userLocation, selectedJobId, onMarkerClick, zoomControl = true }) {
+  const defaultCenter = userLocation || { lat: 15.9129, lng: 79.7400 }; 
 
   return (
-    <MapContainer 
-      center={activeCenter} 
-      zoom={activeZoom} 
-      zoomControl={zoomControl}
-      scrollWheelZoom={scrollWheelZoom}
-      style={{ width: '100%', height: '100%', zIndex: 1 }}
-    >
-      <TileLayer url={tileUrl} />
-      
-      {/* Enables clicking on map to get coordinates (if prop is passed) */}
-      <MapClickHandler onMapClick={onMapClick} />
-      
-      {/* -------------------------------------------------------------
-          MODE 1: SINGLE ROUTE (Used in Post Route / Tracking)
-      ------------------------------------------------------------- */}
-      {pickupLat && jobs.length === 0 && <Marker position={[pickupLat, pickupLng]} />}
-      {dropoffLat && jobs.length === 0 && <Marker position={[dropoffLat, dropoffLng]} />}
-      
-      {/* -------------------------------------------------------------
-          MODE 2: MULTIPLE JOBS (Used in Find Jobs)
-      ------------------------------------------------------------- */}
-      {/* Current User Location Marker */}
-      {userLocation && (
-        <Marker position={[userLocation.lat, userLocation.lng]} icon={createCustomIcon('user', false)} />
-      )}
+    <div style={{ height: '100%', width: '100%', position: 'relative', zIndex: 1 }}>
+      <MapContainer 
+        center={defaultCenter} 
+        zoom={10} 
+        zoomControl={zoomControl}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <MapUpdater center={userLocation} />
 
-      {/* Array of Job Markers */}
-      {jobs.map(job => (
-        <Marker 
-          key={job.id} 
-          position={[job.pickupLat, job.pickupLng]} 
-          icon={createCustomIcon(job.isRecommended ? 'recommended' : 'standard', job.id === selectedJobId)}
-          eventHandlers={{
-            click: () => onMarkerClick && onMarkerClick(job.id)
-          }}
-        />
-      ))}
+        <LayersControl position="topright">
+          
+          {/* 1. STANDARD STREET MAP (NOW DEFAULT) */}
+          <LayersControl.BaseLayer checked name="Street View">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+            />
+          </LayersControl.BaseLayer>
 
-      {/* -------------------------------------------------------------
-          SHARED ROUTE PATH (Polylines)
-      ------------------------------------------------------------- */}
-      {mapPath && mapPath.length > 0 && (
-        <Polyline 
-          positions={mapPath} 
-          pathOptions={{ 
-            color: theme === 'dark' ? '#D4AF37' : '#3B82F6', 
-            weight: 4, 
-            opacity: 0.8, 
-            dashArray: '10, 10', 
-            lineCap: 'round',
-            lineJoin: 'round'
-          }} 
-        />
-      )}
+          {/* 2. SATELLITE */}
+          <LayersControl.BaseLayer name="Satellite View">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+            />
+          </LayersControl.BaseLayer>
 
-      {/* Auto-Pan Controller */}
-      <MapUpdater 
-        bounds={mapPath.length > 0 ? mapPath : null} 
-        center={activeCenter} 
-        zoom={activeZoom} 
-      />
-    </MapContainer>
+          {/* 3. DARK MODE MAP */}
+          <LayersControl.BaseLayer name="Dark Mode">
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution="&copy; CartoDB"
+            />
+          </LayersControl.BaseLayer>
+
+        </LayersControl>
+
+        {userLocation && (
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+            <Popup>You are here</Popup>
+          </Marker>
+        )}
+
+        {jobs.map((job) => (
+          <Marker 
+            key={job.id} 
+            position={[job.pickupLat, job.pickupLng]} 
+            icon={jobIcon}
+            eventHandlers={{ click: () => onMarkerClick && onMarkerClick(job.id) }}
+          >
+            <Popup>
+              <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{job.title}</div>
+              <div style={{ color: '#666', fontSize: '0.85rem' }}>₹{job.price.toFixed(0)} • {job.weight}kg</div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }

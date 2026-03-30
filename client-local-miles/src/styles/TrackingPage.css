@@ -1,0 +1,232 @@
+body {
+  background-color: #f9fafb; /* Soft gray background for the tracking page */
+}
+
+.track-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px 60px 16px;
+  color: #171717;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading */
+.track-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #6B7280;
+  font-weight: 600;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #E5E7EB;
+  border-top: 3px solid #D4AF37;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Header */
+.track-header {
+  margin-bottom: 24px;
+}
+.track-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #171717;
+}
+.track-subtitle {
+  color: #6B7280;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Map */
+.track-map-wrapper {
+  height: 380px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  position: relative;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  background: #E5E7EB;
+}
+
+/* Live Pill Overlay */
+.track-live-pill {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  background: white;
+  padding: 8px 14px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #E5E7EB;
+}
+.track-live-pill span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #374151;
+  letter-spacing: 0.5px;
+}
+.live-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.live-dot.pulsing {
+  background: #10B981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 1.5s infinite;
+}
+.live-dot.offline {
+  background: #9CA3AF;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Cards */
+.track-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid #F3F4F6;
+  margin-bottom: 24px;
+}
+
+/* Courier Profile */
+.courier-profile-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.courier-info-left {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.courier-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #E5E7EB;
+}
+.courier-name {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.courier-vehicle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plate-badge {
+  background: #FEF3C7;
+  color: #D97706;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #FDE68A;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-call-courier {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: #171717;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+.btn-call-courier:active { transform: scale(0.95); }
+.btn-call-courier.disabled {
+  background: #F3F4F6;
+  color: #9CA3AF;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Mini Stepper */
+.mini-stepper {
+  display: flex;
+  flex-direction: column;
+}
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  opacity: 0.4;
+  transition: opacity 0.3s;
+}
+.step.done { opacity: 1; }
+
+.step-icon {
+  width: 28px; height: 28px;
+  display: flex; justify-content: center; align-items: center;
+  color: #10B981;
+  background: white;
+  border-radius: 50%;
+  z-index: 2;
+}
+.empty-circle {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 3px solid #D1D5DB;
+}
+
+.step-text h4 {
+  margin: 2px 0 4px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #171717;
+}
+.step-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.step-connector {
+  width: 2px;
+  height: 24px;
+  background: #E5E7EB;
+  margin-left: 13px; /* Align under 28px icon */
+  margin-top: -4px;
+  margin-bottom: 4px;
+  transition: background 0.3s;
+}
+.step-connector.done {
+  background: #10B981;
+}

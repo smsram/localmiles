@@ -8,6 +8,9 @@ const pricingRoutes = require('./pricing.routes');
 const packageRoutes = require('./package.routes');
 const walletRoutes = require('./wallet.routes');
 const courierRouteRoutes = require('./courier-route.routes.js');
+const courierRoutes = require('./courier.routes.js');
+const notificationRoutes = require('./notification.routes');
+const senderRoutes = require('./sender.routes');
 
 const router = express.Router();
 
@@ -20,5 +23,8 @@ router.use('/pricing', pricingRoutes);
 router.use('/packages', packageRoutes);
 router.use('/wallet', walletRoutes);
 router.use('/courier-routes', courierRouteRoutes);
+router.use('/courier', courierRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/sender', senderRoutes);
 
 module.exports = router;

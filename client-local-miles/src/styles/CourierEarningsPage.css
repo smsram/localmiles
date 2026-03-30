@@ -193,3 +193,148 @@
   .stats-grid { grid-template-columns: 1fr; }
   .col-details { display: none; }
 }
+
+/* --- WEEKLY CHART --- */
+.chart-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; }
+.chart-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; }
+.chart-nav { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; }
+
+.bar-chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 220px; /* Increased height slightly for the tooltip */
+  padding: 0 10px;
+}
+
+.chart-column { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 12px; 
+  width: 100%; 
+}
+
+/* Dual Bar Layout */
+.dual-bar-bg { 
+  display: flex; 
+  align-items: flex-end; 
+  justify-content: center;
+  gap: 4px; /* Space between Earnings and Hours bar */
+  height: 100%; 
+  width: 32px;
+  position: relative; 
+}
+
+.bar-fill { 
+  border-radius: 6px 6px 0 0; 
+  position: relative; 
+}
+
+.bar-fill.earning { 
+  width: 14px; 
+  background: #D1D5DB; 
+  transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.bar-fill.earning.active { background: var(--brand-gold); }
+
+.bar-fill.hour { 
+  width: 14px; 
+  background: #E5E7EB; 
+  /* Added a 0.1s delay so the hour bar grows right after the earning bar */
+  transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s; 
+}
+.bar-fill.hour.active { background: #3B82F6; }
+
+/* Unified Tooltip on Hover */
+.chart-column:hover .bar-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  background: #171717;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #374151;
+  z-index: 10;
+}
+.bar-tooltip div { margin-bottom: 2px; }
+.bar-tooltip div:last-child { margin-bottom: 0; }
+
+.x-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+.x-label.active { color: var(--text-main); font-weight: 800; }
+
+/* Dual Bar Layout */
+.dual-bar-bg { 
+  display: flex; 
+  align-items: flex-end; 
+  justify-content: center;
+  gap: 4px; /* Space between Earnings and Hours bar */
+  height: 100%; 
+  width: 32px;
+  position: relative; 
+}
+
+.bar-fill { 
+  border-radius: 6px 6px 0 0; 
+  position: relative; 
+}
+
+.bar-fill.earning { 
+  width: 14px; 
+  background: #D1D5DB; 
+  transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.bar-fill.earning.active { background: var(--brand-gold); }
+
+.bar-fill.hour { 
+  width: 14px; 
+  background: #E5E7EB; 
+  /* Added a 0.1s delay so the hour bar grows right after the earning bar */
+  transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s; 
+}
+.bar-fill.hour.active { background: #3B82F6; }
+
+/* Unified Tooltip on Hover */
+.chart-column:hover .bar-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  background: #171717;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #374151;
+  z-index: 10;
+}

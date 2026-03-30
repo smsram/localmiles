@@ -10,7 +10,7 @@ import {
 import ShipmentCard from '@/components/shipment/ShipmentCard';
 import Dropdown from '@/components/ui/Dropdown';
 import ConfirmModal from '@/components/ui/ConfirmModal'; 
-import Skeleton from '@/components/ui/Skeleton'; // <-- IMPORT SKELETON
+import Skeleton from '@/components/ui/Skeleton'; 
 
 import '@/styles/ShipmentsPage.css';
 
@@ -23,7 +23,11 @@ export default function ShipmentsPage() {
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
+  
+  // Search state & Debounce
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -44,17 +48,32 @@ export default function ShipmentsPage() {
     { label: 'Delivered', value: 'delivered' }
   ];
 
+  // --- HANDLE DEBOUNCE FOR SEARCH ---
+  // Wait 500ms after user stops typing before setting the debounced search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset to page 1 on new search
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
   // --- FETCH DATA ---
   const fetchShipments = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      if (!token) { router.push('/auth/login'); return; }
+      if (!token) { router.push('/login'); return; }
 
+      // Pass the debouncedSearch as 'search' to the backend
       const query = new URLSearchParams({
         page,
         limit: 5,
-        status: filterStatus !== 'all' ? filterStatus : ''
+        status: filterStatus !== 'all' ? filterStatus : '',
+        search: debouncedSearch
       });
 
       const res = await fetch(`${API_URL}/packages/my-shipments?${query}`, {
@@ -77,21 +96,26 @@ export default function ShipmentsPage() {
   useEffect(() => {
     fetchShipments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterStatus, router]);
+  }, [page, filterStatus, debouncedSearch, router]);
 
   // --- ACTIONS ---
   
-  // 1. Open Details Page
+  // 1. Open Details Page (Used for general view/edit)
   const handleViewDetails = (publicId) => {
     router.push(`/sender/shipments/${publicId}`);
   };
 
-  // 2. Trigger Delete Modal
+  // 2. Open Track Page (Specifically for Live Tracking)
+  const handleTrackLive = (publicId) => {
+    router.push(`/track/${publicId}`);
+  }
+
+  // 3. Trigger Delete Modal
   const requestDelete = (publicId) => {
     setConfirmModal({ isOpen: true, shipmentId: publicId, isProcessing: false });
   };
 
-  // 3. Execute Deletion
+  // 4. Execute Deletion
   const executeDelete = async () => {
     const { shipmentId } = confirmModal;
     setConfirmModal(prev => ({ ...prev, isProcessing: true }));
@@ -105,12 +129,9 @@ export default function ShipmentsPage() {
 
       const data = await res.json();
       if (data.success) {
-        // Remove locally to update UI instantly
         setShipments(prev => prev.filter(s => s.publicId !== shipmentId));
-        // Close modal
         setConfirmModal({ isOpen: false, shipmentId: null, isProcessing: false });
         
-        // Re-fetch to fix pagination counts
         if (shipments.length === 1 && page > 1) {
             setPage(p => p - 1);
         } else {
@@ -127,7 +148,6 @@ export default function ShipmentsPage() {
   };
 
   // --- SKELETON RENDERER ---
-  // A helper function to render fake cards while loading
   const renderSkeletons = () => {
     return Array.from({ length: 4 }).map((_, index) => (
       <div key={index} className="shipment-skeleton-card fade-in">
@@ -176,7 +196,7 @@ export default function ShipmentsPage() {
           <MagnifyingGlassIcon className="input-icon" />
           <input 
             type="text" 
-            placeholder="Search by ID..." 
+            placeholder="Search by ID or Title..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -196,7 +216,6 @@ export default function ShipmentsPage() {
       {/* 3. List */}
       <div className="shipments-list">
         {loading ? (
-          // Render Skeletons instead of generic spinner
           renderSkeletons()
         ) : shipments.length > 0 ? (
           shipments.map((shipment) => (
@@ -204,13 +223,14 @@ export default function ShipmentsPage() {
               key={shipment.id} 
               data={shipment} 
               onViewDetails={() => handleViewDetails(shipment.publicId)} 
+              onTrackLive={() => handleTrackLive(shipment.publicId)} // Assuming ShipmentCard expects this prop
               onDelete={() => requestDelete(shipment.publicId)}          
             />
           ))
         ) : (
           <div className="empty-state fade-in">
-            <p>No shipments found.</p>
-            <button className="btn-clear" onClick={() => setFilterStatus('all')}>Clear Filters</button>
+            <p>{searchQuery ? `No shipments found matching "${searchQuery}"` : "No shipments found."}</p>
+            <button className="btn-clear" onClick={() => { setFilterStatus('all'); setSearchQuery(''); }}>Clear Filters</button>
           </div>
         )}
       </div>

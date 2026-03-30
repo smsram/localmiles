@@ -1,10 +1,12 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { 
   MagnifyingGlassIcon, CubeIcon, DocumentTextIcon, ClockIcon, 
-  ComputerDesktopIcon, StarIcon
+  ComputerDesktopIcon, StarIcon, ExclamationCircleIcon,
+  MapPinIcon as MapPinOutline, FlagIcon
 } from '@heroicons/react/24/outline';
 import { MapPinIcon as MapPinSolid } from '@heroicons/react/24/solid';
 
@@ -15,23 +17,11 @@ import '@/styles/CourierJobsPage.css';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Dynamically import the NEW Reusable Map safely
 const CourierMap = dynamic(() => import('@/components/ui/CourierMap'), { 
   ssr: false, 
   loading: () => <Skeleton width="100%" height="100%" borderRadius="0" /> 
 });
 
-// Haversine Distance Calculator (km)
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; 
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
-
-// Map backend categories to icons
 const getCategoryIcon = (category) => {
   switch(category) {
     case 'DOCUMENTS': return DocumentTextIcon;
@@ -42,6 +32,7 @@ const getCategoryIcon = (category) => {
 };
 
 export default function CourierJobsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   
   const [jobs, setJobs] = useState([]);
@@ -51,41 +42,29 @@ export default function CourierJobsPage() {
   const [userLocation, setUserLocation] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
-  // Refs for auto-scrolling the list
   const cardRefs = useRef({});
 
   // 1. Get User Location & Fetch Jobs
   useEffect(() => {
+    const ANDHRA_PRADESH = { lat: 15.9129, lng: 79.7400 };
+
     const fetchJobs = async (userLat, userLng) => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/packages/available`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        
+        let url = `${API_URL}/packages/available`;
+        if (userLat && userLng) url += `?lat=${userLat}&lng=${userLng}`;
+
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();
 
         if (data.success) {
-          const processedJobs = data.data.map(job => {
-            let distanceToPickup = 0;
-            let isRecommended = false;
-
-            if (userLat && userLng) {
-              distanceToPickup = calculateDistance(userLat, userLng, job.pickupLat, job.pickupLng);
-              isRecommended = distanceToPickup < 5; // Recommend if within 5km
-            }
-
-            return {
-              ...job,
-              distanceToPickup,
-              isRecommended,
-              displayDistance: distanceToPickup ? `${distanceToPickup.toFixed(1)}km away` : 'Distance unknown',
-              icon: getCategoryIcon(job.category)
-            };
-          });
-
-          // Sort: Recommended first, then by closest distance
-          processedJobs.sort((a, b) => b.isRecommended - a.isRecommended || a.distanceToPickup - b.distanceToPickup);
-          setJobs(processedJobs);
+          const finalJobs = data.data.map(job => ({
+            ...job,
+            displayDistance: job.distanceToPickup ? `${job.distanceToPickup.toFixed(1)}km away` : 'Distance unknown',
+            icon: getCategoryIcon(job.category)
+          }));
+          setJobs(finalJobs);
         }
       } catch (error) {
         setToast({ show: true, message: "Failed to load jobs.", type: 'error' });
@@ -100,20 +79,26 @@ export default function CourierJobsPage() {
           setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           fetchJobs(pos.coords.latitude, pos.coords.longitude);
         },
-        () => fetchJobs(null, null) 
+        (err) => {
+          console.warn("Location access denied/failed. Defaulting to AP.", err.message);
+          setToast({ show: true, message: "Using default location (Andhra Pradesh)", type: 'info' });
+          setUserLocation(ANDHRA_PRADESH);
+          fetchJobs(ANDHRA_PRADESH.lat, ANDHRA_PRADESH.lng);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      fetchJobs(null, null);
+      setUserLocation(ANDHRA_PRADESH);
+      fetchJobs(ANDHRA_PRADESH.lat, ANDHRA_PRADESH.lng);
     }
   }, []);
 
-  // 2. Search Filtering
   const filteredJobs = jobs.filter(job => 
     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.pickupAddress.toLowerCase().includes(searchQuery.toLowerCase())
+    job.pickupAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.dropAddress.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // 3. Sync Map -> List (Marker click handling)
   const handleMarkerClick = (jobId) => {
     setSelectedJobId(jobId);
     if (cardRefs.current[jobId]) {
@@ -121,7 +106,11 @@ export default function CourierJobsPage() {
     }
   };
 
-  // --- SKELETONS ---
+  const handleViewDetails = (e, publicId) => {
+    e.stopPropagation(); // Prevents the card's onClick from firing
+    router.push(`/courier/jobs/${publicId}`);
+  };
+
   const renderSkeletons = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {[1, 2, 3, 4].map(i => (
@@ -139,21 +128,16 @@ export default function CourierJobsPage() {
     </div>
   );
 
+  const highPriorityJobs = filteredJobs.filter(j => j.isRecommended || j.urgency === 'URGENT');
+  const lowPriorityJobs = filteredJobs.filter(j => !j.isRecommended && j.urgency !== 'URGENT');
+
   return (
     <div className={`page-container jobs-page fade-in`}>
-      
-      {/* --- LEFT PANEL: REUSABLE MAP --- */}
       <div className="jobs-map-panel">
         <CourierMap 
-          theme={theme} 
-          jobs={filteredJobs} 
-          userLocation={userLocation} 
-          selectedJobId={selectedJobId}
-          onMarkerClick={handleMarkerClick}
-          zoomControl={false}
+          theme={theme} jobs={filteredJobs} userLocation={userLocation} 
+          selectedJobId={selectedJobId} onMarkerClick={handleMarkerClick} zoomControl={false}
         />
-
-        {/* Custom Overlays */}
         <div className="map-overlay-container">
           <div className="controls-column">
             <button className="btn-map-control" title="My Location" onClick={() => {
@@ -163,7 +147,6 @@ export default function CourierJobsPage() {
               <MapPinSolid style={{ width: 20 }} />
             </button>
           </div>
-
           <div className="map-legend">
             <div className="legend-item"><div className="dot-legend dot-gold"></div><span>Best Match</span></div>
             <div className="legend-item"><div className="dot-legend dot-grey"></div><span>Others</span></div>
@@ -172,19 +155,11 @@ export default function CourierJobsPage() {
         </div>
       </div>
 
-      {/* --- RIGHT PANEL: JOBS LIST --- */}
       <div className="jobs-list-panel">
-        
         <div className="jobs-header">
           <div className="search-bar">
             <MagnifyingGlassIcon style={{ width: 20 }} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search pickup locations..." 
-              className="search-input" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <input type="text" placeholder="Search pickup or drop..." className="search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
         </div>
 
@@ -196,58 +171,117 @@ export default function CourierJobsPage() {
             </div>
           ) : (
             <>
-              {/* RECOMMENDED SECTION */}
-              {filteredJobs.filter(j => j.isRecommended).length > 0 && (
+              {/* HIGH PRIORITY SECTION */}
+              {highPriorityJobs.length > 0 && (
                 <>
                   <div className="section-label">
-                    <span>Recommended for You</span>
+                    <span>Priority & Recommended Matches</span>
                     <StarIcon style={{ width: 14, color: '#D4AF37' }} />
                   </div>
-                  {filteredJobs.filter(j => j.isRecommended).map(job => (
+                  {highPriorityJobs.map(job => (
                     <div 
-                      key={job.id} 
-                      ref={el => cardRefs.current[job.id] = el}
+                      key={job.id} ref={el => cardRefs.current[job.id] = el}
                       className={`job-card-recommended ${selectedJobId === job.id ? 'selected' : ''}`}
                       onClick={() => setSelectedJobId(job.id)}
                     >
                       {selectedJobId === job.id && <div className="selected-ring"></div>}
-                      <div className="match-badge">Nearby</div>
+                      
+                      {/* Top Badges */}
+                      <div className="job-badges">
+                        {job.isRecommended && <div className="match-badge">{job.matchReason || 'Nearby'}</div>}
+                        {job.urgency === 'URGENT' && (
+                          <div className="urgent-badge">
+                            <ExclamationCircleIcon width={12} /> URGENT
+                          </div>
+                        )}
+                        {job.urgency === 'SCHEDULED' && (
+                          <div className="scheduled-badge">
+                            <ClockIcon width={12} /> {new Date(job.scheduledDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </div>
+                        )}
+                        {job.urgency === 'STANDARD' && (
+                          <div className="today-badge">TODAY</div>
+                        )}
+                      </div>
+
                       <div className="rec-header">
                         <div className="rec-icon-circle"><job.icon style={{ width: 24 }} /></div>
                         <div className="rec-content">
                           <h4 className="rec-title">{job.title}</h4>
-                          <p className="rec-sub">{job.pickupAddress.split(',')[0]} • {job.weight}kg</p>
+                          <p className="rec-sub">{job.weight}kg • {job.category}</p>
                         </div>
                         <div className="rec-price">₹{job.price.toFixed(0)}</div>
                       </div>
+
+                      {/* Route Timeline */}
+                      <div className="route-timeline">
+                        <div className="route-point">
+                          <MapPinOutline className="route-icon pickup" />
+                          <span className="route-text">{job.pickupAddress.split(',')[0]}</span>
+                        </div>
+                        <div className="route-line"></div>
+                        <div className="route-point">
+                          <FlagIcon className="route-icon dropoff" />
+                          <span className="route-text">{job.dropAddress.split(',')[0]}</span>
+                        </div>
+                      </div>
+
                       <div className="rec-footer">
-                        <div className="pill-detour"><div style={{width: 12}}><MapPinSolid /></div> {job.displayDistance}</div>
-                        <div className="pill-time"><ClockIcon style={{width: 16}} /> {job.distanceKm}km Route</div>
+                        <div className="pill-group">
+                          <div className="pill-detour"><MapPinSolid style={{width: 12}} /> {job.displayDistance}</div>
+                          <div className="pill-time"><ClockIcon style={{width: 14}} /> {job.distanceKm}km Route</div>
+                        </div>
+                        <button 
+                          className="btn-view-details" 
+                          onClick={(e) => handleViewDetails(e, job.publicId)}
+                        >
+                          Review & Accept
+                        </button>
                       </div>
                     </div>
                   ))}
                 </>
               )}
 
-              {/* STANDARD SECTION */}
-              {filteredJobs.filter(j => !j.isRecommended).length > 0 && (
+              {/* LOW PRIORITY SECTION */}
+              {lowPriorityJobs.length > 0 && (
                 <>
-                  <div className="section-label" style={{ marginTop: '16px' }}>All Nearby Jobs</div>
-                  {filteredJobs.filter(j => !j.isRecommended).map(job => (
+                  <div className="section-label" style={{ marginTop: '16px' }}>Other Available Jobs</div>
+                  {lowPriorityJobs.map(job => (
                     <div 
-                      key={job.id} 
-                      ref={el => cardRefs.current[job.id] = el}
+                      key={job.id} ref={el => cardRefs.current[job.id] = el}
                       className={`job-card-standard ${selectedJobId === job.id ? 'selected' : ''}`}
                       onClick={() => setSelectedJobId(job.id)}
                     >
-                      <div className="std-left">
-                        <div className="std-icon-box"><job.icon style={{ width: 22 }} /></div>
-                        <div className="std-info">
-                          <h4>{job.title}</h4>
-                          <p>{job.displayDistance} • {job.pickupAddress.split(',')[0]}</p>
+                      <div className="std-top">
+                        <div className="std-left">
+                          <div className="std-icon-box"><job.icon style={{ width: 22 }} /></div>
+                          <div className="std-info">
+                            <h4>
+                              {job.title} 
+                              {job.urgency === 'SCHEDULED' && <span className="std-scheduled-text">(Scheduled)</span>}
+                            </h4>
+                            <p>{job.displayDistance} • {job.weight}kg</p>
+                          </div>
                         </div>
+                        <div className="std-price">₹{job.price.toFixed(0)}</div>
                       </div>
-                      <div className="std-price">₹{job.price.toFixed(0)}</div>
+                      
+                      <div className="std-route-simple">
+                        <span className="truncate">{job.pickupAddress.split(',')[0]}</span>
+                        <span className="route-arrow">→</span>
+                        <span className="truncate">{job.dropAddress.split(',')[0]}</span>
+                      </div>
+
+                      <div className="std-footer">
+                        <span className="std-distance">{job.distanceKm}km total</span>
+                        <button 
+                          className="btn-view-details-sm" 
+                          onClick={(e) => handleViewDetails(e, job.publicId)}
+                        >
+                          Details
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </>

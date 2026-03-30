@@ -1,5 +1,8 @@
-/* src/styles/CourierJobsPage.css */
+/* ==========================================================================
+   COURIER JOBS PAGE STYLES
+   ========================================================================== */
 
+/* --- 1. MAIN LAYOUT --- */
 .page-container.jobs-page {
   padding: 0;
   height: 100vh;
@@ -9,7 +12,6 @@
   position: relative;
 }
 
-/* --- LEFT PANEL: MAP --- */
 .jobs-map-panel {
   flex: 1;
   position: relative;
@@ -19,6 +21,19 @@
   z-index: 1;
 }
 
+.jobs-list-panel {
+  width: 440px; /* Slightly wider for better card fitting */
+  flex-shrink: 0;
+  background: var(--bg-page);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 20;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.03);
+}
+
+/* --- 2. MAP OVERLAYS --- */
 .map-overlay-container {
   position: absolute;
   bottom: 24px;
@@ -26,7 +41,7 @@
   display: flex;
   align-items: flex-end;
   gap: 16px;
-  z-index: 10;
+  z-index: 1000; /* Above leaflet tiles */
 }
 
 .controls-column {
@@ -35,38 +50,33 @@
   gap: 12px;
 }
 
-.btn-map-control, .btn-zoom {
+.btn-map-control {
   width: 44px;
   height: 44px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   cursor: pointer;
   color: var(--text-main);
-  transition: 0.2s;
+  transition: all 0.2s;
 }
 
-.zoom-group {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  overflow: hidden;
+.btn-map-control:hover {
+  background: var(--bg-page);
+  color: var(--brand-gold);
+  transform: translateY(-2px);
 }
-
-.btn-zoom:first-child { border-bottom: 1px solid var(--border-light); }
 
 .map-legend {
   background: var(--bg-card);
-  padding: 10px 16px;
+  padding: 0 16px;
   border-radius: 12px;
   border: 1px solid var(--border-light);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -77,7 +87,7 @@
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-main);
@@ -87,21 +97,12 @@
 .dot-gold { background: #D4AF37; }
 .dot-grey { background: #9CA3AF; }
 
-/* --- RIGHT PANEL: JOBS LIST --- */
-.jobs-list-panel {
-  width: 420px;
-  flex-shrink: 0;
-  background: var(--bg-card);
-  border-left: 1.5px solid var(--border-light);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  z-index: 20;
-}
-
+/* --- 3. LIST PANEL HEADER & SEARCH --- */
 .jobs-header {
   padding: 24px 24px 16px 24px;
   background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  z-index: 10;
 }
 
 .search-bar {
@@ -109,58 +110,112 @@
   align-items: center;
   background: var(--bg-page);
   border: 1.5px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px 16px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
-.search-icon { color: var(--text-muted); }
+.search-bar:focus-within {
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.search-icon { color: var(--text-muted); flex-shrink: 0; }
 
 .search-input {
   border: none;
   background: transparent;
   outline: none;
   width: 100%;
-  margin-left: 10px;
+  margin-left: 12px;
   color: var(--text-main);
   font-size: 0.95rem;
 }
 
+/* --- 4. SCROLL AREA & SECTIONS --- */
 .jobs-scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 24px 24px 24px;
+  padding: 20px 24px 40px 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   background: var(--bg-page);
 }
 
 .section-label {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 800;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 4px;
 }
 
-/* --- RECOMMENDED CARD --- */
+/* --- 5. HIGH PRIORITY / RECOMMENDED CARDS --- */
 .job-card-recommended {
   background: var(--bg-card);
   border: 2px solid #EAB308;
   border-radius: 16px;
-  padding: 20px;
+  padding: 24px 20px 20px; /* Top padding accommodates badges */
   position: relative;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(234, 179, 8, 0.1);
-  transition: all 0.2s;
+  box-shadow: 0 6px 16px rgba(234, 179, 8, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 12px; /* Space for the absolute positioned badges */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-card-recommended:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(234, 179, 8, 0.15); }
+
+/* Badges */
+.job-badges {
+  position: absolute;
+  top: -14px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.match-badge {
+  background: #CA8A04; color: white;
+  font-size: 0.75rem; font-weight: 800;
+  padding: 4px 12px; border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(202, 138, 4, 0.2);
+}
+
+.urgent-badge {
+  background: #EF4444; color: white;
+  font-size: 0.75rem; font-weight: 800;
+  padding: 4px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 4px;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.scheduled-badge {
+  background: #3B82F6; color: white;
+  font-size: 0.75rem; font-weight: 800;
+  padding: 4px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 4px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Card Content Grid */
+.rec-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .rec-icon-circle {
   width: 48px; height: 48px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: rgba(212, 175, 55, 0.1);
   border: 1px solid rgba(212, 175, 55, 0.2);
@@ -168,94 +223,256 @@
   color: #D4AF37;
 }
 
-.rec-title { color: var(--text-main); margin: 0; font-size: 1.1rem; font-weight: 800; }
-.rec-sub { color: var(--text-muted); font-size: 0.85rem; }
-.rec-price { color: var(--text-main); font-size: 1.5rem; font-weight: 800; }
-
-.match-badge {
-  position: absolute; top: -12px; right: 16px;
-  background: #CA8A04; color: white;
-  font-size: 0.7rem; font-weight: 800;
-  padding: 4px 10px; border-radius: 8px;
+.rec-content {
+  flex: 1;
+  min-width: 0; /* Critical for text truncation in flexbox */
 }
 
+.rec-title { 
+  color: var(--text-main); margin: 0 0 4px 0; font-size: 1.1rem; font-weight: 800; 
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rec-sub { color: var(--text-muted); font-size: 0.85rem; margin: 0; font-weight: 600;}
+
+.rec-price { 
+  color: var(--text-main); font-size: 1.4rem; font-weight: 800; flex-shrink: 0;
+}
+
+/* Route Timeline */
+.route-timeline {
+  padding: 12px 16px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border-light);
+}
+
+.route-point { display: flex; align-items: center; gap: 12px; }
+.route-icon { width: 18px; flex-shrink: 0; }
+.route-icon.pickup { color: #10B981; } 
+.route-icon.dropoff { color: #EF4444; } 
+
+.route-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.route-line {
+  width: 2px;
+  height: 14px;
+  background: var(--border-light);
+  margin-left: 8px; /* Perfect alignment under 18px icon */
+}
+
+/* Footer & Buttons */
 .rec-footer {
   border-top: 1px solid var(--border-light);
-  display: flex; gap: 12px; margin-top: 12px; padding-top: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 16px;
 }
 
-.pill-detour {
-  background: rgba(234, 88, 12, 0.1);
-  color: #EA580C;
-  padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
-  display: flex; align-items: center; gap: 4px;
+.pill-group { display: flex; flex-direction: column; gap: 6px; }
+
+.pill-detour, .pill-time {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700;
 }
+.pill-detour { color: #EA580C; background: rgba(234, 88, 12, 0.1); padding: 4px 10px; border-radius: 6px; width: fit-content; }
+.pill-time { color: var(--text-muted); }
 
-.pill-time { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.btn-view-details {
+  background: var(--brand-gold); color: #171717;
+  border: none; padding: 12px 20px; border-radius: 10px;
+  font-size: 0.9rem; font-weight: 800; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  white-space: nowrap;
+}
+.btn-view-details:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3); }
 
-/* --- STANDARD CARD --- */
+/* --- 6. STANDARD CARDS (LOW PRIORITY) --- */
 .job-card-standard {
   background: var(--bg-card);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
   border: 1px solid var(--border-light);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.job-card-standard:hover { border-color: var(--brand-gold); }
+.job-card-standard:hover { border-color: var(--brand-gold); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.std-top { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 12px; }
+
+.std-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
 .std-icon-box {
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 44px; height: 44px; flex-shrink: 0; border-radius: 10px;
   background: var(--bg-page); color: var(--text-muted);
   display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-light);
 }
 
-.std-info h4 { color: var(--text-main); margin: 0; font-size: 0.95rem; font-weight: 700; }
-.std-info p { color: var(--text-muted); font-size: 0.75rem; }
-.std-price { color: var(--text-main); font-size: 1.1rem; font-weight: 800; }
+.std-info { flex: 1; min-width: 0; }
+.std-info h4 { 
+  color: var(--text-main); margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 800; 
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.std-info p { color: var(--text-muted); font-size: 0.8rem; margin: 0; font-weight: 600; }
+.std-scheduled-text { font-size: 0.75rem; color: #3B82F6; margin-left: 6px; font-weight: 800; }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 1000px) {
-  .page-container.jobs-page { flex-direction: column; height: auto; overflow-y: auto; }
-  .jobs-map-panel { width: 100%; height: 50vh; min-height: 400px; flex: none; order: 1; }
-  .jobs-list-panel { width: 100%; border-left: none; border-top: 1.5px solid var(--border-light); order: 2; }
-  .map-overlay-container { bottom: 16px; left: 16px; }
-  .map-legend { display: none; }
+.std-price { color: var(--text-main); font-size: 1.15rem; font-weight: 800; flex-shrink: 0; }
+
+.std-route-simple {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; background: var(--bg-page); border-radius: 8px;
+  font-size: 0.8rem; color: var(--text-main); font-weight: 600;
+  border: 1px solid var(--border-light);
 }
 
-/* ADD TO: src/styles/CourierJobsPage.css */
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.route-arrow { color: var(--text-muted); flex-shrink: 0; font-weight: 800; }
 
-/* Selected States */
-.job-card-recommended.selected {
-  border-color: #10B981; /* Green */
-  background: rgba(16, 185, 129, 0.05);
-  transform: scale(1.02);
+.std-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px; border-top: 1px dashed var(--border-light);
 }
 
-.job-card-standard.selected {
+.std-distance { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+
+.btn-view-details-sm {
+  background: transparent; color: var(--brand-gold);
+  border: 1.5px solid var(--brand-gold); padding: 6px 16px; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+}
+.btn-view-details-sm:hover { background: rgba(212, 175, 55, 0.1); }
+
+/* --- 7. SELECTED STATES (MAP SYNC) --- */
+.job-card-recommended.selected, .job-card-standard.selected {
   border-color: #10B981;
-  background: rgba(16, 185, 129, 0.05);
-  transform: scale(1.02);
-}
-
-.job-card-recommended, .job-card-standard {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(16, 185, 129, 0.03);
 }
 
 .selected-ring {
-  position: absolute;
-  top: -4px; left: -4px; right: -4px; bottom: -4px;
-  border: 2px solid #10B981;
-  border-radius: 20px;
-  pointer-events: none;
-  animation: pulseRing 1.5s infinite;
+  position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 2px solid #10B981; border-radius: 20px;
+  pointer-events: none; animation: pulseRing 1.5s infinite; z-index: 1;
 }
 
 @keyframes pulseRing {
-  0% { transform: scale(0.95); opacity: 1; }
-  100% { transform: scale(1.05); opacity: 0; }
+  0% { transform: scale(0.98); opacity: 1; }
+  100% { transform: scale(1.02); opacity: 0; }
+}
+
+/* --- 8. RESPONSIVE DESIGN (MOBILE/TABLET) --- */
+@media (max-width: 1024px) {
+  .page-container.jobs-page {
+    flex-direction: column;
+    height: 100vh; /* Stay full screen */
+  }
+
+  .jobs-map-panel {
+    width: 100%;
+    height: 40vh; /* Map takes top 40% */
+    min-height: 250px;
+    flex: none;
+    order: 1;
+  }
+
+  .jobs-list-panel {
+    width: 100%;
+    height: 60vh; /* List takes bottom 60% */
+    border-left: none;
+    border-top: 2px solid var(--border-light);
+    order: 2;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    border-radius: 24px 24px 0 0; /* Bubble up over the map */
+    margin-top: -20px; /* Overlap effect */
+  }
+
+  .jobs-header {
+    border-radius: 24px 24px 0 0;
+    padding: 20px 20px 12px 20px;
+  }
+
+  .jobs-scroll-area {
+    padding: 16px 20px 100px 20px; /* Extra bottom padding for mobile navigation bar */
+  }
+
+  .map-overlay-container {
+    bottom: 40px; /* Push up above the overlapping list panel */
+    left: 16px;
+    right: 16px; /* Allow right alignment if needed */
+    justify-content: space-between;
+  }
+  
+  .map-legend { display: none; /* Hide legend to save space on mobile */ }
+}
+
+/* --- BADGE SYSTEM --- */
+.job-badges {
+  position: absolute;
+  top: -12px; /* Pulls it up halfway over the border */
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.urgent-badge, .scheduled-badge, .match-badge, .today-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.urgent-badge {
+  background: #EF4444; /* Bright Red */
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+.scheduled-badge {
+  background: #3B82F6; /* Bright Blue */
+  color: white;
+  border: 1px solid #2563eb;
+}
+
+.match-badge {
+  background: #EAB308; /* Gold */
+  color: #422006;
+  border: 1px solid #ca8a04;
+}
+
+.today-badge {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+/* Animation for Urgent Badge to catch attention */
+.urgent-badge {
+  animation: pulseUrgent 2s infinite;
+}
+
+@keyframes pulseUrgent {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
